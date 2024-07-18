@@ -1,1 +1,24 @@
-spring.application.name=CloudFileSharingService
+spring:
+  application:
+    name: CloudFileSharingService
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc.lob.non_contextual_creation: true
+    open-in-view: true
+application:
+  security:
+    jwt:
+      secret-key: "YOUR_SECRET_KEY"
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000
