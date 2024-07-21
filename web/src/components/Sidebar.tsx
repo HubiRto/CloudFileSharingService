@@ -13,9 +13,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
+import {useState} from "react";
+import FileUpload from "@/components/FileUpload.tsx";
 
 export const Sidebar = () => {
     const paths = useNavigation();
+    const [triggerUpload, setTriggerUpload] = useState(false);
 
     return (
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -31,7 +34,9 @@ export const Sidebar = () => {
                             <DropdownMenuItem>New folder</DropdownMenuItem>
                             <DropdownMenuSeparator/>
                             <DropdownMenuGroup>
-                                <DropdownMenuItem>Upload Files</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setTriggerUpload(true)}>
+                                    Upload Files
+                                </DropdownMenuItem>
                                 <DropdownMenuItem>Upload Folder</DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
@@ -71,6 +76,7 @@ export const Sidebar = () => {
                     </Tooltip>
                 </TooltipProvider>
             </nav>
+            <FileUpload triggerUpload={triggerUpload}/>
         </aside>
     );
 }
