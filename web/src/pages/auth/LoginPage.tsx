@@ -28,7 +28,7 @@ const LoginPage = () => {
 
     useEffect(() => {
         if(authState?.token) {
-            navigate("/");
+            navigate("/my-files");
         }
     }, [authState]);
 
@@ -40,7 +40,7 @@ const LoginPage = () => {
         try {
             setLoading(true);
             await onLogin?.(data as LoginRequest);
-            navigate("/");
+            navigate("/my-files");
             toast.success('Success login')
         } catch (err: any) {
             if (err.message === 'Invalid email or password') {

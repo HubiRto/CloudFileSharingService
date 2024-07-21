@@ -1,27 +1,76 @@
-import {UserItem} from "@/components/UserItem.tsx";
-import {Command, CommandGroup, CommandItem, CommandList} from "@/components/ui/command.tsx";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip.tsx";
+import {Link} from "react-router-dom";
+import {Plus, SettingsIcon} from "lucide-react";
+import {useNavigation} from "@/hooks/useNavigation.tsx";
+import {SidebarElement} from "@/SidebarElement.tsx";
+import {ModeToggle} from "@/components/DarkModeToggle.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {Folder, Share, Trash, Users} from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu.tsx";
 
-export function Sidebar() {
+export const Sidebar = () => {
+    const paths = useNavigation();
+
     return (
-        <div className="flex flex-col w-[300px] min-w-[300px] border-r min-h-screen p-4 gap-4">
-            <div>
-                <UserItem/>
-            </div>
-            <Button>Create New</Button>
-            <div>
-                <Command>
-                    <CommandList>
-                        <CommandGroup>
-                            <CommandItem><Folder className="w-4 h-4 mr-2"/>My Files</CommandItem>
-                            <CommandItem><Users className="w-4 h-4 mr-2"/>Shared with me</CommandItem>
-                            <CommandItem><Share className="w-4 h-4 mr-2"/>Shared by me</CommandItem>
-                            <CommandItem><Trash className="w-4 h-4 mr-2"/>Trash</CommandItem>
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </div>
-        </div>
+        <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+            <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
+                <TooltipProvider>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button className="w-9 h-9" variant="outline" size="icon">
+                                <Plus className="h-4 w-4 rotate-0"/>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem>New folder</DropdownMenuItem>
+                            <DropdownMenuSeparator/>
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem>Upload Files</DropdownMenuItem>
+                                <DropdownMenuItem>Upload Folder</DropdownMenuItem>
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    {paths.map((path) => {
+                        return (
+                            <SidebarElement
+                                isActive={path.active}
+                                href={path.to}
+                                name={path.name}
+                                children={path.icon}
+                            />
+                        );
+                    })}
+                </TooltipProvider>
+            </nav>
+            <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
+                <ModeToggle/>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Link
+                                to="#"
+                                className="
+                                    flex h-9 w-9 items-center
+                                    justify-center rounded-lg
+                                    text-muted-foreground
+                                    transition-colors
+                                    hover:text-foreground
+                                    md:h-8 md:w-8"
+                            >
+                                <SettingsIcon className="h-5 w-5"/>
+                                <span className="sr-only">Settings</span>
+                            </Link>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">Settings</TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </nav>
+        </aside>
     );
-};
+}

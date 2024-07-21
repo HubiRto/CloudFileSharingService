@@ -35,7 +35,7 @@ const RegisterPage = () => {
 
     useEffect(() => {
         if(authState?.token) {
-            navigate("/");
+            navigate("/my-files");
         }
     }, [authState]);
 
