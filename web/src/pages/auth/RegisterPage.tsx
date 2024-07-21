@@ -10,8 +10,6 @@ import {Button} from "@/components/ui/button";
 import {FcGoogle} from "react-icons/fc";
 import {useAuth} from "@/providers/AuthContext";
 import {Link, useNavigate} from "react-router-dom";
-import {Dialog, DialogContent, DialogTitle} from "@/components/ui/dialog.tsx";
-import emailIcon from '../../../public/assets/email-icon.png';
 import {RegisterRequest} from "@/models/RegisterRequest.ts";
 import toast from "react-hot-toast";
 import {Spinner} from "@/components/Spinner.tsx";
@@ -32,9 +30,6 @@ type SignUpFormValues = z.infer<typeof signUpSchema>;
 const RegisterPage = () => {
     const {onRegister, authState} = useAuth();
     const [error, setError] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [email, setEmail] = useState('');
-    const [isAfterRegistration, setIsAfterRegistration] = useState(false);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
@@ -48,21 +43,13 @@ const RegisterPage = () => {
         resolver: zodResolver(signUpSchema),
     });
 
-    useEffect(() => {
-        if (isAfterRegistration && !isModalOpen) {
-            navigate('/login');
-        }
-    }, [isAfterRegistration, isModalOpen]);
-
     const handleSignUp: SubmitHandler<SignUpFormValues> = async (data) => {
         const {confirmPassword, ...registerData} = data;
         try {
-            setEmail(data.email);
             setLoading(true);
             await onRegister?.(registerData as RegisterRequest);
-            setIsModalOpen(true);
-            setIsAfterRegistration(true);
             toast.success('Success registration')
+            navigate("/login");
         } catch (err: any) {
             if (err.message === 'User with this email already exist') {
                 setFormError("email", {message: 'Email already exist'})
@@ -174,20 +161,6 @@ const RegisterPage = () => {
                     </p>
                 </Card>
             </div>
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent aria-describedby={undefined}>
-                    <div className="text-center">
-                        <img src={emailIcon} alt="Email Icon" className="mx-auto h-20 w-20"/>
-                        <DialogTitle className="mt-4 text-xl font-bold text-gray-900">
-                            Email Confirmation
-                        </DialogTitle>
-                        <p className="mt-2 text-gray-600">We have sent an email to <span
-                            className="text-blue-500">{email}</span> to confirm the validity of our
-                            email address. After receiving the email, follow the link provided to complete your
-                            registration.</p>
-                    </div>
-                </DialogContent>
-            </Dialog>
         </>
     );
 };

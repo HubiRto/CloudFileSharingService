@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
-import {BrowserRouter, createBrowserRouter, RouterProvider} from "react-router-dom";
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import {ProtectedRouteWrapper} from "@/wrapper/ProtectedRouteWrapper.tsx";
 import HomePage from "@/pages/HomePage.tsx";
 import ErrorPage from "@/pages/ErrorPage.tsx";
@@ -32,14 +32,10 @@ const routes = routesConfig.map(({path, element, wrappers, errorElement}) => ({
 const router = createBrowserRouter(routes);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <BrowserRouter>
-            <AuthProvider>
-                <ToastProvider/>
-                <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-                    <RouterProvider router={router}/>
-                </ThemeProvider>
-            </AuthProvider>
-        </BrowserRouter>
-    </React.StrictMode>,
+    <AuthProvider>
+        <ToastProvider/>
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+            <RouterProvider router={router}/>
+        </ThemeProvider>
+    </AuthProvider>
 )

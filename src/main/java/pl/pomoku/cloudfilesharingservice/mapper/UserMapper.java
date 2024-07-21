@@ -6,6 +6,7 @@ import org.mapstruct.Mappings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.pomoku.cloudfilesharingservice.dto.request.RegisterRequest;
+import pl.pomoku.cloudfilesharingservice.dto.response.UserResponse;
 import pl.pomoku.cloudfilesharingservice.entity.User;
 
 @Mapper(componentModel = "spring")
@@ -24,4 +25,6 @@ public abstract class UserMapper {
             @Mapping(target = "storageSize", constant = "10")
     })
     public abstract User toUser(RegisterRequest request);
+
+    public abstract UserResponse userToUserResponse(User user);
 }
