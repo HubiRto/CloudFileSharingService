@@ -41,9 +41,10 @@ export const Sidebar = () => {
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    {paths.map((path) => {
+                    {paths.map((path, index) => {
                         return (
                             <SidebarElement
+                                key={index}
                                 isActive={path.active}
                                 href={path.to}
                                 name={path.name}

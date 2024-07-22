@@ -1,5 +1,4 @@
 const mimeTypes: { [key: string]: string } = {
-    'folder': 'folder',
     // Audio
     'audio/aac': 'aac',
     'audio/midi': 'midi',
@@ -12,6 +11,7 @@ const mimeTypes: { [key: string]: string } = {
     'audio/3gpp2': '3g2',
 
     // Video
+    'video/mp4': 'mp4',
     'video/x-msvideo': 'avi',
     'video/mpeg': 'mpeg',
     'video/ogg': 'ogv',

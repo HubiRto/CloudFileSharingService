@@ -5,13 +5,22 @@ import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {FaRegStar, FaStar} from "react-icons/fa";
 import {useState} from "react";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@/components/ui/hover-card.tsx";
-import {Folder} from "lucide-react";
+import {Link} from "react-router-dom";
+
+import pngSvg from '@/assets/png.svg';
+import jpgSvg from '@/assets/jpg.svg';
+import pdfSvg from '@/assets/pdf.svg';
+import videoSvg from '@/assets/mpg.svg'
+import folderSvg from '@/assets/folder.svg'
+import {File} from "lucide-react";
+
 
 export type FileCol = {
     id: number;
     type: string;
     name: string;
     owner: string;
+    path: string;
     lastModified: string;
     size: number;
 }
@@ -69,27 +78,55 @@ export const columns: ColumnDef<FileCol>[] = [
         accessorKey: "type",
         header: "Type",
         cell: ({row}) => {
-            if (row.original.type === 'folder') {
-                return <Folder/>
-            } else if (row.original.type === 'png') {
-                return (
-                    <HoverCard>
-                        <HoverCardTrigger asChild>
-                            <img src="@/assets/ich_aep.svg" alt="file"/>
-                        </HoverCardTrigger>
-                        <HoverCardContent className="w-[200px] rounded-md shadow-lg">
-                            <img
-                                src="https://assets.puzzlefactory.pl/puzzle/113/519/original.jpg"
-                                alt="Preview image"
-                                width={200}
-                                height={150}
-                                className="rounded-t-md object-cover"
-                            />
-                        </HoverCardContent>
-                    </HoverCard>
-                );
-            } else {
-                return <img src="@/assets/ich_aep.svg" alt="file"/>;
+            switch (row.original.type) {
+                case 'dir': {
+                    return <img src={folderSvg} className="h-8 w-8" alt="pdf_file"/>;
+                }
+                case 'jpeg': {
+                    return (
+                        <HoverCard>
+                            <HoverCardTrigger asChild>
+                                <img src={jpgSvg} className="h-8 w-8" alt="jpg_file"/>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-[200px] rounded-md shadow-lg">
+                                <img
+                                    src="https://assets.puzzlefactory.pl/puzzle/113/519/original.jpg"
+                                    alt="Preview image"
+                                    width={200}
+                                    height={150}
+                                    className="rounded-t-md object-cover"
+                                />
+                            </HoverCardContent>
+                        </HoverCard>
+                    );
+                }
+                case 'png': {
+                    return (
+                        <HoverCard>
+                            <HoverCardTrigger asChild>
+                                <img src={pngSvg} className="h-8 w-8" alt="png_file"/>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-[200px] rounded-md shadow-lg">
+                                <img
+                                    src="https://assets.puzzlefactory.pl/puzzle/113/519/original.jpg"
+                                    alt="Preview image"
+                                    width={200}
+                                    height={150}
+                                    className="rounded-t-md object-cover"
+                                />
+                            </HoverCardContent>
+                        </HoverCard>
+                    );
+                }
+                case 'pdf': {
+                    return <img src={pdfSvg} className="h-8 w-8" alt="pdf_file"/>;
+                }
+                case 'mp4':
+                case 'webm': {
+                    return <img src={videoSvg} className="h-8 w-8" alt="mp4_file"/>;
+                }
+                default:
+                    return <File className="w-8 h-8"/>
             }
         },
         enableSorting: false,
@@ -98,6 +135,13 @@ export const columns: ColumnDef<FileCol>[] = [
     {
         accessorKey: "name",
         header: "Name",
+        cell: ({row}) => {
+            if (row.original.type === 'dir') {
+                return <Link to={`${row.original.name}`}>{row.original.name}</Link>;
+            } else {
+                return <span>{row.original.name}</span>;
+            }
+        }
     },
     {
         accessorKey: "lastModified",
@@ -107,4 +151,4 @@ export const columns: ColumnDef<FileCol>[] = [
         accessorKey: "size",
         header: "Size",
     },
-]
+];

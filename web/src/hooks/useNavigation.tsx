@@ -13,7 +13,7 @@ export const useNavigation = () => {
             icon: pathname === "/my-files"
                 ? <Files className="h-4 w-4 transition-all group-hover:scale-110"/>
                 : <Files className="h-5 w-5"/>,
-            active: pathname === "/my-files"
+            active: pathname.startsWith("/my-files")
         },
         {
             name: "Shared with me",

@@ -2,6 +2,8 @@ package pl.pomoku.cloudfilesharingservice.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -32,8 +34,8 @@ public class FileMetadataService {
     private final FileMetadataRepository fileMetadataRepository;
     private final UserService userService;
 
-    public List<FileMetadata> findAllByPathAndToken(String path, String token) {
-        return fileMetadataRepository.findAllByPathAndCreatedBy(path, userService.getUserFromToken(token));
+    public Page<FileMetadata> findAllByPathAndToken(String path, String token, Pageable pageable) {
+        return fileMetadataRepository.findAllByPathAndCreatedBy(path, userService.getUserFromToken(token), pageable);
     }
 
     public void addFolder(AddFolderRequest request, String token) {
