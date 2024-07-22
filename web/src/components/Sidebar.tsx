@@ -2,7 +2,7 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/compon
 import {Link} from "react-router-dom";
 import {Plus, SettingsIcon} from "lucide-react";
 import {useNavigation} from "@/hooks/useNavigation.tsx";
-import {SidebarElement} from "@/SidebarElement.tsx";
+import {SidebarElement} from "@/components/SidebarElement.tsx";
 import {ModeToggle} from "@/components/DarkModeToggle.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {

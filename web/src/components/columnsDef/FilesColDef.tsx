@@ -2,29 +2,14 @@
 
 import {ColumnDef} from "@tanstack/react-table"
 import {Checkbox} from "@/components/ui/checkbox.tsx";
-import aep_svg from '../../assets/ich_aep.svg'
-import ai_svg from '../../assets/icn_ai.svg'
-import doc_svg from '../../assets/icn_doc.svg'
-import fla_svg from '../../assets/icn_fla.svg'
-import png_svg from '../../assets/icn_png.svg';
-import {Button} from "@/components/ui/button.tsx";
 import {FaRegStar, FaStar} from "react-icons/fa";
 import {useState} from "react";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@/components/ui/hover-card.tsx";
-
-const FileTypeIconMap = {
-    aep: aep_svg,
-    ai: ai_svg,
-    doc: doc_svg,
-    fla: fla_svg,
-    png: png_svg,
-};
-
-export type FileType = keyof typeof FileTypeIconMap;
+import {Folder} from "lucide-react";
 
 export type FileCol = {
     id: number;
-    type: FileType;
+    type: string;
     name: string;
     owner: string;
     lastModified: string;
@@ -84,11 +69,13 @@ export const columns: ColumnDef<FileCol>[] = [
         accessorKey: "type",
         header: "Type",
         cell: ({row}) => {
-            if (row.original.type === 'png') {
+            if (row.original.type === 'folder') {
+                return <Folder/>
+            } else if (row.original.type === 'png') {
                 return (
                     <HoverCard>
                         <HoverCardTrigger asChild>
-                            <img src={FileTypeIconMap[row.original.type]} alt="file"/>
+                            <img src="@/assets/ich_aep.svg" alt="file"/>
                         </HoverCardTrigger>
                         <HoverCardContent className="w-[200px] rounded-md shadow-lg">
                             <img
@@ -102,7 +89,7 @@ export const columns: ColumnDef<FileCol>[] = [
                     </HoverCard>
                 );
             } else {
-                return <img src={FileTypeIconMap[row.original.type]} alt="file"/>;
+                return <img src="@/assets/ich_aep.svg" alt="file"/>;
             }
         },
         enableSorting: false,

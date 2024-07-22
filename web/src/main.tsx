@@ -15,7 +15,7 @@ const wrapWithProtectedRoute = (element: React.ReactNode) => <ProtectedRouteWrap
 
 
 const routesConfig = [
-    {path: "/my-files", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
+    {path: "/my-files/*", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
     {path: "/shared-with-me", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
     {path: "/shared-by-me", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
     {path: "/trash", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},

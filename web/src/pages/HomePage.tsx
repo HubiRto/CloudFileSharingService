@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import {Input} from "@/components/ui/input"
 import {
     Breadcrumb,
@@ -12,9 +12,51 @@ import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
 import {FilterIcon, ImportIcon, PlusIcon, SearchIcon} from "lucide-react";
 import {DataTable} from "@/components/DataTable.tsx";
-import {columns} from "@/components/columnsDef/FilesColDef.tsx";
+import {columns, FileCol} from "@/components/columnsDef/FilesColDef.tsx";
+import {useEffect, useState} from "react";
+import axios from "axios";
+import {FileResponse} from "@/models/FileResponse.ts";
+import mimeTypes from "@/utils/mimeTypes.ts";
+import {format} from "date-fns";
+import {useAuth} from "@/providers/AuthContext.tsx";
+
 
 export default function HomePage() {
+    const {'*': path} = useParams();
+    const [files, setFiles] = useState<FileResponse[] | undefined>(undefined);
+    const navigate = useNavigate();
+    const {authState} = useAuth();
+
+    useEffect(() => {
+        if (authState?.token) {
+            axios.get<FileResponse[]>(`http://localhost:8080/api/v1/files?path=/${path}`,
+                {
+                    headers: {
+                        "Authorization": `Bearer ${authState?.token}`
+                    },
+                }
+            )
+                .then((res) => {
+                    setFiles(res.data);
+                })
+                .catch((err: any) => {
+                    console.log(err);
+                    navigate("/my-files");
+                });
+        }
+    }, [path, authState?.token]);
+
+    const mapToCol = (files: FileResponse[]): FileCol[] => {
+        return files.map((item) => ({
+            id: item.id,
+            type: mimeTypes[item.mime],
+            name: item.name,
+            owner: "Me",
+            lastModified: format(item.createdAt, "MMMM do, yyyy"),
+            size: item.size
+        }));
+    }
+
     return (
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 w-full">
             <header
@@ -74,48 +116,9 @@ export default function HomePage() {
                                 performance.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <DataTable columns={columns} data={[
-                                {
-                                    id: 1,
-                                    type: "aep",
-                                    name: "screely-1666841037591.png",
-                                    owner: "Me",
-                                    lastModified: "2 minutes ago",
-                                    size: 0.00
-                                },
-                                {
-                                    id: 2,
-                                    type: "ai",
-                                    name: "screely-1666841037591.png",
-                                    owner: "Me",
-                                    lastModified: "2 minutes ago",
-                                    size: 0.00
-                                },
-                                {
-                                    id: 3,
-                                    type: "doc",
-                                    name: "screely-1666841037591.png",
-                                    owner: "Me",
-                                    lastModified: "2 minutes ago",
-                                    size: 0.00
-                                },
-                                {
-                                    id: 4,
-                                    type: "fla",
-                                    name: "screely-1666841037591.png",
-                                    owner: "Me",
-                                    lastModified: "2 minutes ago",
-                                    size: 0.00
-                                },
-                                {
-                                    id: 5,
-                                    type: "png",
-                                    name: "screely-1666841037591.png",
-                                    owner: "Me",
-                                    lastModified: "2 minutes ago",
-                                    size: 0.00
-                                },
-                            ]}/>
+                            {files && (
+                                <DataTable columns={columns} data={mapToCol(files!)}/>
+                            )}
                         </CardContent>
                     </Card>
                 </main>
