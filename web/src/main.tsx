@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import {createBrowserRouter, Navigate, RouterProvider} from "react-router-dom";
 import {ProtectedRouteWrapper} from "@/wrapper/ProtectedRouteWrapper.tsx";
 import HomePage from "@/pages/HomePage.tsx";
 import ErrorPage from "@/pages/ErrorPage.tsx";
@@ -15,6 +15,7 @@ const wrapWithProtectedRoute = (element: React.ReactNode) => <ProtectedRouteWrap
 
 
 const routesConfig = [
+    {path: "/", element: <Navigate to={"/my-files"}/>, wrappers: [], errorElement: <ErrorPage/>},
     {path: "/my-files/*", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
     {path: "/shared-with-me", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
     {path: "/shared-by-me", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},

@@ -1,91 +1,91 @@
-import React, {useState} from 'react';
-import axios, {AxiosProgressEvent} from 'axios';
-import {Progress} from "@/components/ui/progress";
-import {Button} from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "@/components/ui/dialog";
-import toast from "react-hot-toast";
+import React, {useEffect, useState} from 'react';
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {FileInput, FileUploader, FileUploaderContent, FileUploaderItem} from "@/components/FileUploader.tsx";
+import {Paperclip} from "lucide-react";
+import {Button} from "@/components/ui/button.tsx";
 
-const FileUpload = ({triggerUpload}: { triggerUpload: boolean }) => {
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [uploadProgress, setUploadProgress] = useState<number>(0);
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+type Props = React.PropsWithChildren<{
+    isOpen: boolean;
+    onClose: () => void;
+    onFilesSelected: (files: File[]) => void;
+}>
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            const filesArray = Array.from(event.target.files);
-            setSelectedFiles(filesArray);
-            setDialogOpen(true);
-        }
-    };
-
-    const handleUpload = () => {
-        const formData = new FormData();
-        selectedFiles.forEach(file => {
-            formData.append('files', file);
-        });
-
-        axios.post('http://127.0.0.1:8080/api/v1/files/upload', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            },
-            onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-                if (progressEvent.total) {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setUploadProgress(percentCompleted);
-                }
-            }
-        })
-            .then(() => {
-                toast.success(`Successfully uploaded ${selectedFiles.length} files!`);
-                setDialogOpen(false);
-                setSelectedFiles([]);
-                setUploadProgress(0);
-            })
-            .catch(() => {
-                toast.error('File upload failed!');
-                setDialogOpen(false);
-            });
-    };
-
-    React.useEffect(() => {
-        if (triggerUpload) {
-            document.getElementById("file-upload")?.click();
-        }
-    }, [triggerUpload]);
-
+const FileSvgDraw = () => {
     return (
         <>
-            <input type="file" multiple onChange={handleFileChange} style={{display: 'none'}} id="file-upload"/>
-
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Upload Progress</DialogTitle>
-                        <DialogDescription>
-                            Uploading {selectedFiles.length} file(s).
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        {selectedFiles.map((file, index) => (
-                            <div key={index}>
-                                <div>{file.name}</div>
-                            </div>
-                        ))}
-                        <Progress value={uploadProgress} className="w-full"/>
-                    </div>
-                    <DialogFooter>
-                        <Button onClick={handleUpload}>Start Upload</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <svg
+                className="w-8 h-8 mb-3 text-gray-500 dark:text-gray-400"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 16"
+            >
+                <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                />
+            </svg>
+            <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
+                <span className="font-semibold">Click to upload</span>
+                &nbsp; or drag and drop
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+                SVG, PNG, JPG or GIF
+            </p>
         </>
+    );
+};
+
+const FileUpload = ({isOpen, onClose, onFilesSelected}: Props) => {
+    const [files, setFiles] = useState<File[] | null>(null);
+
+    const dropZoneConfig = {
+        maxFiles: 5,
+        multiple: true,
+    };
+
+    useEffect(() => {
+        if(!isOpen){
+            setFiles(null);
+        }
+    }, [isOpen]);
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
+                <DialogHeader>
+                    <DialogTitle>Upload</DialogTitle>
+                </DialogHeader>
+                <FileUploader
+                    value={files}
+                    onValueChange={setFiles}
+                    dropzoneOptions={dropZoneConfig}
+                    className="relative bg-background rounded-lg p-2"
+                >
+                    <FileInput className="outline-dashed outline-1">
+                        <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
+                            <FileSvgDraw />
+                        </div>
+                    </FileInput>
+                    <FileUploaderContent>
+                        {files &&
+                            files.length > 0 &&
+                            files.map((file, i) => (
+                                <FileUploaderItem key={i} index={i}>
+                                    <Paperclip className="h-4 w-4 stroke-current" />
+                                    <span>{file.name}</span>
+                                </FileUploaderItem>
+                            ))}
+                    </FileUploaderContent>
+                </FileUploader>
+                <DialogFooter>
+                    <Button onClick={() => onFilesSelected(files!)}>Upload</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
 

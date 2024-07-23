@@ -27,6 +27,7 @@ public class FileMetadata {
     private long size;
 
     private LocalDateTime createdAt;
+    private LocalDateTime lastModifiedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)

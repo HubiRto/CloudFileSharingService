@@ -17,4 +17,5 @@ public class FileMetadataResponse {
     private String mime;
     private long size;
     private LocalDateTime createdAt;
+    private LocalDateTime lastModifiedAt;
 }

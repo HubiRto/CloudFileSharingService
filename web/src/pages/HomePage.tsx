@@ -3,18 +3,18 @@ import {Input} from "@/components/ui/input"
 import {BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator} from "@/components/ui/breadcrumb"
 import {Button} from "@/components/ui/button"
 import {
+    CloudUpload,
     DownloadIcon,
     FileIcon,
-    FilterIcon,
+    FilePlus2,
     FolderIcon,
+    FolderPlus,
     HomeIcon,
     ImageIcon,
-    ImportIcon,
     LayoutGridIcon,
     ListIcon,
     MountainIcon,
     MoveHorizontalIcon,
-    PlusIcon,
     SearchIcon,
     Settings,
     ShareIcon,
@@ -32,7 +32,6 @@ import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger
@@ -44,6 +43,8 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import {format} from "date-fns";
 import {ModeToggle} from "@/components/ModeToggle.tsx";
 import {debounce} from 'lodash';
+import FileUpload from "@/components/FileUpload.tsx";
+import {FloatingUploadCard} from "@/components/FloatingUploadCard.tsx";
 
 
 export default function HomePage() {
@@ -59,6 +60,11 @@ export default function HomePage() {
     const [favorites, setFavorites] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState("");
+
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+
+    const [isFloatingUploadCardOpen, setIsFloatingUploadCardOpen] = useState(false);
 
     useEffect(() => {
         setFiles([]);
@@ -124,7 +130,7 @@ export default function HomePage() {
                 console.error('Error searching files:', error);
             }
         }
-    }, 100);
+    }, 250);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const query = event.target.value;
@@ -174,7 +180,12 @@ export default function HomePage() {
             <BreadcrumbList>
                 <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                        <Link to="/my-files"><HomeIcon className="w-4 h-4"/></Link>
+                        <Link to="/my-files">
+                            <div className="flex items-center flex-row gap-2">
+                                <HomeIcon className="w-4 h-4"/>
+                                Home
+                            </div>
+                        </Link>
                     </BreadcrumbLink>
                 </BreadcrumbItem>
                 {pathArray?.map((p, index) => (
@@ -189,8 +200,28 @@ export default function HomePage() {
         );
     };
 
+    const handleFilesSelected = (selectedFiles: File[]) => {
+        setIsUploadModalOpen(false);
+        setUploadFiles(selectedFiles);
+        setIsFloatingUploadCardOpen(true);
+    };
+
+    const handleUploadComplete = (fileResponse: FileResponse) => {
+        setFiles((prevFiles) => [...prevFiles, fileResponse]);
+    };
+
+    const handleClearFiles = () => {
+        setUploadFiles([]);
+        setIsFloatingUploadCardOpen(false);
+    };
+
     return (
         <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
+            <FileUpload
+                isOpen={isUploadModalOpen}
+                onClose={() => setIsUploadModalOpen(false)}
+                onFilesSelected={handleFilesSelected}
+            />
             <div className="hidden border-r bg-muted/40 lg:block">
                 <div className="flex h-full max-h-screen flex-col gap-2">
                     <div className="flex h-[60px] items-center border-b px-6">
@@ -203,23 +234,6 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1 overflow-auto py-2">
                         <nav className="grid items-start px-4 text-sm font-medium">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" size="sm" className="w-full mb-5">
-                                        Add New File
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>New folder</DropdownMenuItem>
-                                    <DropdownMenuSeparator/>
-                                    <DropdownMenuGroup>
-                                        <DropdownMenuItem>
-                                            Upload Files
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem>Upload Folder</DropdownMenuItem>
-                                    </DropdownMenuGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
                             <Link
                                 to="#"
                                 className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
@@ -313,21 +327,22 @@ export default function HomePage() {
                         </div>
                     </div>
                 </header>
-                <header className={`flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6 transition-all duration-400 ease-in-out ${searchQuery ? 'max-h-0 opacity-0' : 'max-h-40 opacity-100'}`}>
+                <header
+                    className={`flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6 transition-all duration-400 ease-in-out ${searchQuery ? 'max-h-0 opacity-0' : 'max-h-40 opacity-100'}`}>
                     <div className="flex items-center justify-between w-full">
                         {generateBreadcrumbs()}
                         <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" className="h-8 gap-1">
-                                <FilterIcon className="h-3.5 w-3.5"/>
-                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter</span>
+                            <Button size="sm" className="h-8 gap-1" onClick={() => setIsUploadModalOpen(true)}>
+                                <CloudUpload className="h-3.5 w-3.5"/>
+                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Upload</span>
                             </Button>
                             <Button variant="outline" size="sm" className="h-8 gap-1">
-                                <ImportIcon className="h-3.5 w-3.5"/>
-                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Export</span>
+                                <FolderPlus className="h-3.5 w-3.5"/>
+                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">New folder</span>
                             </Button>
-                            <Button size="sm" className="h-8 gap-1">
-                                <PlusIcon className="h-3.5 w-3.5"/>
-                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add</span>
+                            <Button variant="outline" size="sm" className="h-8 gap-1">
+                                <FilePlus2 className="h-3.5 w-3.5"/>
+                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">New file</span>
                             </Button>
                         </div>
                     </div>
@@ -444,6 +459,13 @@ export default function HomePage() {
                         )}
                     </InfiniteScroll>
                 </main>
+                <FloatingUploadCard
+                    isOpen={isFloatingUploadCardOpen}
+                    path={path === '' ? '/' : (`/${path}/`)}
+                    files={uploadFiles}
+                    onUploadComplete={handleUploadComplete}
+                    onClearFiles={handleClearFiles}
+                />
             </div>
         </div>
     )

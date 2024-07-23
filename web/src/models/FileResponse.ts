@@ -6,4 +6,5 @@ export interface FileResponse {
     mime: string;
     size: number;
     createdAt: string;
+    lastModifiedAt: string;
 }
