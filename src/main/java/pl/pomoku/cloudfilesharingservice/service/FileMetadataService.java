@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import pl.pomoku.cloudfilesharingservice.dto.request.AddFolderRequest;
+import pl.pomoku.cloudfilesharingservice.dto.request.RenameRequest;
 import pl.pomoku.cloudfilesharingservice.entity.FileMetadata;
 import pl.pomoku.cloudfilesharingservice.entity.User;
 import pl.pomoku.cloudfilesharingservice.exception.AppException;
@@ -39,6 +40,44 @@ public class FileMetadataService {
     }
     public Page<FileMetadata> findAllByNameContainingAndToken(String context, String token, Pageable pageable) {
         return fileMetadataRepository.findAllByNameContainingAndCreatedBy(context, userService.getUserFromToken(token), pageable);
+    }
+
+    public void deleteFile(Long id, String token) {
+        User user = userService.getUserFromToken(token);
+
+        FileMetadata file = fileMetadataRepository.findById(id)
+                .orElseThrow(() -> new AppException("File with this id does not exist", HttpStatus.NOT_FOUND));
+
+        if(!file.getCreatedBy().equals(user)) {
+            throw new AppException("You don't have permission to this file", HttpStatus.FORBIDDEN);
+        }
+
+        FileMetadata parent = file.getParent();
+        parent.setSize(parent.getSize() - file.getSize());
+
+        fileMetadataRepository.delete(file);
+        fileMetadataRepository.save(parent);
+    }
+
+    public void renameFile(Long id, RenameRequest request, String token) {
+        User user = userService.getUserFromToken(token);
+
+        FileMetadata file = fileMetadataRepository.findById(id)
+                .orElseThrow(() -> new AppException("File with this id does not exist", HttpStatus.NOT_FOUND));
+
+        if(!file.getCreatedBy().equals(user)) {
+            throw new AppException("You don't have permission to this file", HttpStatus.FORBIDDEN);
+        }
+
+        if(fileMetadataRepository.existsByNameAndPathAndCreatedBy(request.getNewName(), file.getPath(), user)) {
+            throw new AppException("File or Folder with this name already exists", HttpStatus.CONFLICT);
+        }
+
+        int indexOfExtensionDot = file.getName().lastIndexOf(".");
+        String extension = file.getName().substring(indexOfExtensionDot);
+
+        file.setName(request.getNewName() + extension);
+        fileMetadataRepository.save(file);
     }
 
     public FileMetadata addFolder(AddFolderRequest request, String token) {

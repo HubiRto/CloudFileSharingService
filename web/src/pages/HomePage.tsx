@@ -3,20 +3,29 @@ import {Input} from "@/components/ui/input"
 import {BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator} from "@/components/ui/breadcrumb"
 import {Button} from "@/components/ui/button"
 import {
+    ArrowDownToLine,
     CloudUpload,
     FileIcon,
     FilePlus2,
+    Files,
+    FolderArchive,
     FolderIcon,
+    FolderKanban,
     FolderPlus,
     HomeIcon,
     ImageIcon,
     LayoutGridIcon,
+    Link2,
     ListIcon,
     MountainIcon,
+    Pencil,
+    Scissors,
     SearchIcon,
     Settings,
+    Share2,
     ShareIcon,
     StarIcon,
+    Trash,
     TrashIcon,
     UserPen,
     UsersIcon,
@@ -30,20 +39,24 @@ import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
+    DropdownMenuLabel,
     DropdownMenuSeparator,
+    DropdownMenuShortcut,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx";
 import {PaginatedResponse} from "@/models/PaginatedResponse.ts";
 import InfiniteScroll from "react-infinite-scroll-component";
-import {format} from "date-fns";
 import {ModeToggle} from "@/components/ModeToggle.tsx";
 import {debounce} from 'lodash';
 import FileUpload from "@/components/FileUpload.tsx";
 import {FloatingUploadCard} from "@/components/FloatingUploadCard.tsx";
 import {AddFolderModal} from "@/components/modals/AddFolderModal.tsx";
+import {format} from "date-fns";
+import {RenameFileModal} from "@/components/modals/RenameFile.tsx";
 
 
 export default function HomePage() {
@@ -65,6 +78,11 @@ export default function HomePage() {
 
     const [isFloatingUploadCardOpen, setIsFloatingUploadCardOpen] = useState(false);
     const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
+
+    //Rename file
+    const [isRenameFileModalOpen, setIsRenameFileModalOpen] = useState<boolean>(false);
+    const [selectRenameFileId, setSelectRenameFileId] = useState<number | null>(null);
+    const [selectRenameFileName, setSelectRenameFileName] = useState<string | null>(null);
 
     useEffect(() => {
         setFiles([]);
@@ -220,6 +238,23 @@ export default function HomePage() {
         setIsAddFolderModalOpen(false);
     }
 
+    const handleRenameFile = (id: number, name: string) => {
+        setSelectRenameFileId(id);
+        setSelectRenameFileName(name);
+        setIsRenameFileModalOpen(true);
+    }
+
+    const handleRenameFileCompleted = (oldName: string, newName: string) => {
+        setFiles(prevFiles =>
+            prevFiles.map(file =>
+                file.name === oldName ? {...file, name: newName} : file
+            )
+        );
+        setSelectRenameFileId(null);
+        setSelectRenameFileName(null);
+        setIsRenameFileModalOpen(false);
+    }
+
     return (
         <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
             <FileUpload
@@ -341,7 +376,8 @@ export default function HomePage() {
                                 <CloudUpload className="h-3.5 w-3.5"/>
                                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Upload</span>
                             </Button>
-                            <Button variant="outline" size="sm" className="h-8 gap-1" onClick={() => setIsAddFolderModalOpen(true)}>
+                            <Button variant="outline" size="sm" className="h-8 gap-1"
+                                    onClick={() => setIsAddFolderModalOpen(true)}>
                                 <FolderPlus className="h-3.5 w-3.5"/>
                                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">New folder</span>
                             </Button>
@@ -424,11 +460,71 @@ export default function HomePage() {
                                             <TableCell>
                                                 {mimeToIcon(item.mime, true)}
                                             </TableCell>
-                                            <TableCell className="font-medium">{item.mime !== 'dir' ? item.name : (
-                                                <Link to={path === '' ? item.name : (`${path}/${item.name}`)}>
-                                                    {item.name}
-                                                </Link>
-                                            )}</TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <TableCell
+                                                        className="font-medium">{item.mime !== 'dir' ? item.name : (
+                                                        <Link to={path === '' ? item.name : (`${path}/${item.name}`)}>
+                                                            {item.name}
+                                                        </Link>
+                                                    )}</TableCell>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent className="w-56">
+                                                    <DropdownMenuLabel>{item.name}</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator/>
+                                                    <DropdownMenuGroup>
+                                                        <DropdownMenuItem>
+                                                            <Link2 className="mr-2 h-4 w-4"/>
+                                                            <span>Open in new tab</span>
+                                                            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem>
+                                                            <ArrowDownToLine className="mr-2 h-4 w-4"/>
+                                                            <span>Download</span>
+                                                            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem>
+                                                            <Share2 className="mr-2 h-4 w-4"/>
+                                                            <span>Share</span>
+                                                            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuGroup>
+                                                    <DropdownMenuSeparator/>
+                                                    <DropdownMenuItem
+                                                        onClick={() => (item.mime === 'dir' ? {} : handleRenameFile(item.id, item.name))}>
+                                                        <Pencil className="mr-2 h-4 w-4"/>
+                                                        <span>Rename</span>
+                                                        <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator/>
+                                                    <DropdownMenuGroup>
+                                                        <DropdownMenuItem>
+                                                            <Scissors className="mr-2 h-4 w-4"/>
+                                                            <span>Move</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem>
+                                                            <Files className="mr-2 h-4 w-4"/>
+                                                            <span>Copy</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuGroup>
+                                                    <DropdownMenuSeparator/>
+                                                    <DropdownMenuGroup>
+                                                        <DropdownMenuItem>
+                                                            <FolderArchive className="mr-2 h-4 w-4"/>
+                                                            <span>Compress</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem>
+                                                            <FolderKanban className="mr-2 h-4 w-4"/>
+                                                            <span>Extract</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuGroup>
+                                                    <DropdownMenuSeparator/>
+                                                    <DropdownMenuItem className="text-red-500">
+                                                        <Trash className="mr-2 h-4 w-4"/>
+                                                        <span>Delete</span>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                             <TableCell className="hidden md:table-cell">
                                                 {formatFileSize(item.size)}
                                             </TableCell>
@@ -454,6 +550,13 @@ export default function HomePage() {
                     onClose={() => setIsAddFolderModalOpen(false)}
                     path={path === '' ? '/' : (`/${path}/`)}
                     onAddComplete={handleAddFolderComplete}
+                />
+                <RenameFileModal
+                    id={selectRenameFileId!}
+                    oldName={selectRenameFileName!}
+                    isOpen={isRenameFileModalOpen}
+                    onClose={() => setIsRenameFileModalOpen(false)}
+                    onRenameComplete={handleRenameFileCompleted}
                 />
             </div>
         </div>

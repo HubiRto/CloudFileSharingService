@@ -1,6 +1,7 @@
 package pl.pomoku.cloudfilesharingservice.controller;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pl.pomoku.cloudfilesharingservice.dto.request.AddFolderRequest;
+import pl.pomoku.cloudfilesharingservice.dto.request.RenameRequest;
 import pl.pomoku.cloudfilesharingservice.dto.response.FileMetadataResponse;
 import pl.pomoku.cloudfilesharingservice.entity.FileMetadata;
 import pl.pomoku.cloudfilesharingservice.mapper.FilesMapper;
@@ -77,5 +79,28 @@ public class FileController {
         Page<FileMetadata> filePage = fileMetadataService.findAllByNameContainingAndToken(context, token, PageRequest.of(page, size));
         Page<FileMetadataResponse> responsePage = filePage.map(filesMapper::mapToResponse);
         return ResponseEntity.ok(responsePage);
+    }
+
+    @PatchMapping("/rename/{id}")
+    public ResponseEntity<String> renameFile(
+            @NotNull(message = "Token cannot be null")
+            @NotEmpty(message = "Token cannot be empty")
+            @RequestHeader("Authorization") String token,
+            @Valid @RequestBody RenameRequest request,
+            @PathVariable Long id
+    ) {
+        fileMetadataService.renameFile(id, request, token);
+        return ResponseEntity.ok("Successfully renamed file");
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteFile(
+            @NotNull(message = "Token cannot be null")
+            @NotEmpty(message = "Token cannot be empty")
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id
+    ) {
+        fileMetadataService.deleteFile(id, token);
+        return ResponseEntity.ok("Successfully deleted file");
     }
 }
