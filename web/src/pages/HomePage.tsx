@@ -4,7 +4,6 @@ import {BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator} fro
 import {Button} from "@/components/ui/button"
 import {
     CloudUpload,
-    DownloadIcon,
     FileIcon,
     FilePlus2,
     FolderIcon,
@@ -14,7 +13,6 @@ import {
     LayoutGridIcon,
     ListIcon,
     MountainIcon,
-    MoveHorizontalIcon,
     SearchIcon,
     Settings,
     ShareIcon,
@@ -45,6 +43,7 @@ import {ModeToggle} from "@/components/ModeToggle.tsx";
 import {debounce} from 'lodash';
 import FileUpload from "@/components/FileUpload.tsx";
 import {FloatingUploadCard} from "@/components/FloatingUploadCard.tsx";
+import {AddFolderModal} from "@/components/modals/AddFolderModal.tsx";
 
 
 export default function HomePage() {
@@ -65,6 +64,7 @@ export default function HomePage() {
     const [uploadFiles, setUploadFiles] = useState<File[]>([]);
 
     const [isFloatingUploadCardOpen, setIsFloatingUploadCardOpen] = useState(false);
+    const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
 
     useEffect(() => {
         setFiles([]);
@@ -215,6 +215,11 @@ export default function HomePage() {
         setIsFloatingUploadCardOpen(false);
     };
 
+    const handleAddFolderComplete = (res: FileResponse) => {
+        setFiles((prev) => [...prev, res]);
+        setIsAddFolderModalOpen(false);
+    }
+
     return (
         <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
             <FileUpload
@@ -336,7 +341,7 @@ export default function HomePage() {
                                 <CloudUpload className="h-3.5 w-3.5"/>
                                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Upload</span>
                             </Button>
-                            <Button variant="outline" size="sm" className="h-8 gap-1">
+                            <Button variant="outline" size="sm" className="h-8 gap-1" onClick={() => setIsAddFolderModalOpen(true)}>
                                 <FolderPlus className="h-3.5 w-3.5"/>
                                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">New folder</span>
                             </Button>
@@ -424,33 +429,11 @@ export default function HomePage() {
                                                     {item.name}
                                                 </Link>
                                             )}</TableCell>
-                                            <TableCell
-                                                className="hidden md:table-cell">{formatFileSize(item.size)}</TableCell>
-                                            <TableCell
-                                                className="hidden md:table-cell">{format(item.createdAt, "MMMM do, yyyy")}</TableCell>
-                                            <TableCell>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon"
-                                                                className="w-8 h-8 rounded-full">
-                                                            <MoveHorizontalIcon className="h-4 w-4"/>
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>
-                                                            <DownloadIcon className="h-4 w-4 mr-2"/>
-                                                            Download
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <ShareIcon className="h-4 w-4 mr-2"/>
-                                                            Share
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <TrashIcon className="h-4 w-4 mr-2"/>
-                                                            Delete
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                            <TableCell className="hidden md:table-cell">
+                                                {formatFileSize(item.size)}
+                                            </TableCell>
+                                            <TableCell className="hidden md:table-cell">
+                                                {format(item.createdAt, "MMMM do, yyyy")}
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -465,6 +448,12 @@ export default function HomePage() {
                     files={uploadFiles}
                     onUploadComplete={handleUploadComplete}
                     onClearFiles={handleClearFiles}
+                />
+                <AddFolderModal
+                    isOpen={isAddFolderModalOpen}
+                    onClose={() => setIsAddFolderModalOpen(false)}
+                    path={path === '' ? '/' : (`/${path}/`)}
+                    onAddComplete={handleAddFolderComplete}
                 />
             </div>
         </div>

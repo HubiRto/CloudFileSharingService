@@ -15,6 +15,7 @@ import {Progress} from "@/components/ui/progress.tsx";
 import {FileResponse} from "@/models/FileResponse.ts";
 import axios, {AxiosProgressEvent} from "axios";
 import toast from "react-hot-toast";
+import {Separator} from "@/components/ui/separator.tsx";
 
 type Props = React.PropsWithChildren<{
     isOpen: boolean;
@@ -77,7 +78,7 @@ export const FloatingUploadCard = ({isOpen, path, files, onUploadComplete, onCle
         formData.append("path", path);
 
         axios
-            .post("http://127.0.0.1:8080/api/v1/files/upload", formData, {
+            .post<FileResponse[]>("http://127.0.0.1:8080/api/v1/files/upload", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -95,7 +96,7 @@ export const FloatingUploadCard = ({isOpen, path, files, onUploadComplete, onCle
                 },
             })
             .then((response) => {
-                onUploadComplete(response.data);
+                onUploadComplete(response.data[0]);
                 toast.success(`Successfully uploaded ${file.name}!`);
             })
             .catch(() => {
@@ -105,42 +106,45 @@ export const FloatingUploadCard = ({isOpen, path, files, onUploadComplete, onCle
 
     return (
         <div
-            className={`fixed bottom-4 right-5 w-[300px] bg-card rounded-lg shadow-lg ${
+            className={`fixed bottom-0 right-7 w-[300px] bg-card rounded-t-lg shadow-lg ${
                 isMinimalized ? "h-[60px]" : ""
             } ${!isOpen && "hidden"}`}
         >
-            <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center justify-between px-4 py-2">
                 <h3 className="text-lg font-medium">Files Uploaded</h3>
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" onClick={() => setIsMinimalized(!isMinimalized)}>
-                        {!isMinimalized ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                        {!isMinimalized ? <ChevronDown className="h-4 w-4"/> : <ChevronUp className="h-4 w-4"/>}
                         <span className="sr-only">Minimize</span>
                     </Button>
                     <Button variant="ghost" size="icon" onClick={onClearFiles}>
-                        <XIcon className="h-4 w-4" />
+                        <XIcon className="h-4 w-4"/>
                         <span className="sr-only">Close</span>
                     </Button>
                 </div>
             </div>
             <div className={`${isMinimalized ? "hidden" : ""} transition-all duration-400 ease-in-out`}>
-                <div className="p-4 space-y-3">
-                    {uploadingFiles.map((file, index) => (
-                        <div key={index} className="flex items-center gap-3">
-                            {fileToIcon(file)}
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-sm font-medium">{file.name}</p>
-                                    {uploadProgress[index] === 100 ? (
-                                        <CheckIcon className="h-5 w-5 text-green-500" />
-                                    ) : (
-                                        <ClockIcon className="h-5 w-5 text-muted-foreground" />
-                                    )}
+                {uploadingFiles.map((file, index) => (
+                    <>
+                        <Separator/>
+                        <div className="p-4">
+                            <div key={index} className="flex items-center gap-3">
+                                {fileToIcon(file)}
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-medium">{file.name}</p>
+                                        {uploadProgress[index] === 100 ? (
+                                            <CheckIcon className="h-5 w-5 text-green-500"/>
+                                        ) : (
+                                            <ClockIcon className="h-5 w-5 text-muted-foreground"/>
+                                        )}
+                                    </div>
+                                    <Progress value={uploadProgress[index]} className={`mt-1`}/>
                                 </div>
-                                <Progress value={uploadProgress[index]} className="mt-1" />
                             </div>
                         </div>
-                    ))}
-                </div>
+                    </>
+                ))}
             </div>
         </div>
     );

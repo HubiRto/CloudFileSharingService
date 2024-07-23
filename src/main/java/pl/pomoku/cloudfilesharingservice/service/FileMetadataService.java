@@ -41,7 +41,7 @@ public class FileMetadataService {
         return fileMetadataRepository.findAllByNameContainingAndCreatedBy(context, userService.getUserFromToken(token), pageable);
     }
 
-    public void addFolder(AddFolderRequest request, String token) {
+    public FileMetadata addFolder(AddFolderRequest request, String token) {
         User user = userService.getUserFromToken(token);
 
         FileMetadata parent = null;
@@ -70,7 +70,7 @@ public class FileMetadataService {
         newFolder.setCreatedBy(user);
         newFolder.setParent(parent);
 
-        fileMetadataRepository.save(newFolder);
+        return fileMetadataRepository.save(newFolder);
     }
 
     @Transactional

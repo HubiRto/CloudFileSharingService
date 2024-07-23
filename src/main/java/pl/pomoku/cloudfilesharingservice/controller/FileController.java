@@ -42,14 +42,13 @@ public class FileController {
     }
 
     @PostMapping("/folders/add")
-    public ResponseEntity<String> addFolder(
+    public ResponseEntity<FileMetadataResponse> addFolder(
             @NotNull(message = "Token cannot be null")
             @NotEmpty(message = "Token cannot be empty")
             @RequestHeader("Authorization") String token,
             @RequestBody AddFolderRequest request
     ) {
-        fileMetadataService.addFolder(request, token);
-        return ResponseEntity.ok("Successfully added folder");
+        return ResponseEntity.ok(filesMapper.mapToResponse(fileMetadataService.addFolder(request, token)));
     }
 
     @GetMapping("/files/path")
