@@ -37,6 +37,9 @@ public class FileMetadataService {
     public Page<FileMetadata> findAllByPathAndToken(String path, String token, Pageable pageable) {
         return fileMetadataRepository.findAllByPathAndCreatedBy(path, userService.getUserFromToken(token), pageable);
     }
+    public Page<FileMetadata> findAllByNameContainingAndToken(String context, String token, Pageable pageable) {
+        return fileMetadataRepository.findAllByNameContainingAndCreatedBy(context, userService.getUserFromToken(token), pageable);
+    }
 
     public void addFolder(AddFolderRequest request, String token) {
         User user = userService.getUserFromToken(token);

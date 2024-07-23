@@ -12,6 +12,8 @@ import java.util.Optional;
 @Repository
 public interface FileMetadataRepository extends JpaRepository<FileMetadata, Long> {
     Page<FileMetadata> findAllByPathAndCreatedBy(String path, User createdBy, Pageable pageable);
+    Page<FileMetadata> findAllByNameContainingAndCreatedBy(String context, User createdBy, Pageable pageable);
+
     Optional<FileMetadata> findByPathAndNameAndCreatedBy(String path, String name, User createdBy);
     boolean existsByNameAndPathAndCreatedBy(String name, String path, User createdBy);
 }

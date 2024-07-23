@@ -52,16 +52,30 @@ public class FileController {
         return ResponseEntity.ok("Successfully added folder");
     }
 
-    @GetMapping
+    @GetMapping("/files/path")
     public ResponseEntity<Page<FileMetadataResponse>> getFiles(
             @NotNull(message = "Token cannot be null")
             @NotEmpty(message = "Token cannot be empty")
             @RequestHeader("Authorization") String token,
-            @RequestParam(value = "path") String path,
+            @RequestParam(value = "path", required = false) String path,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size
     ) {
         Page<FileMetadata> filePage = fileMetadataService.findAllByPathAndToken(path, token, PageRequest.of(page, size));
+        Page<FileMetadataResponse> responsePage = filePage.map(filesMapper::mapToResponse);
+        return ResponseEntity.ok(responsePage);
+    }
+
+    @GetMapping("/files/context")
+    public ResponseEntity<Page<FileMetadataResponse>> getFilesByContext(
+            @NotNull(message = "Token cannot be null")
+            @NotEmpty(message = "Token cannot be empty")
+            @RequestHeader("Authorization") String token,
+            @RequestParam(value = "context") String context,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size
+    ) {
+        Page<FileMetadata> filePage = fileMetadataService.findAllByNameContainingAndToken(context, token, PageRequest.of(page, size));
         Page<FileMetadataResponse> responsePage = filePage.map(filesMapper::mapToResponse);
         return ResponseEntity.ok(responsePage);
     }
