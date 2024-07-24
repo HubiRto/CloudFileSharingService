@@ -22,6 +22,9 @@ type Props = React.PropsWithChildren<{
 const formSchema = z.object({
     name: z.string().min(5, {
         message: "Name must be at least 5 characters.",
+    })
+    .regex(/^[\w,\s-]+\.[A-Za-z]{2,4}$/, {
+        message: "Name must be a valid filename with a proper extension.",
     }),
 })
 
