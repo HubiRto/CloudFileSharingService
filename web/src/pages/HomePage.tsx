@@ -1,4 +1,4 @@
-import {Link, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import {Input} from "@/components/ui/input"
 import {BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator} from "@/components/ui/breadcrumb"
 import {Button} from "@/components/ui/button"
@@ -6,26 +6,18 @@ import {
     ArrowDownToLine,
     CloudUpload,
     FileIcon,
-    FilePlus2,
-    Files,
-    FolderArchive,
-    FolderIcon,
-    FolderKanban,
+    FilePlus2, Files, FolderArchive,
+    FolderIcon, FolderKanban,
     FolderPlus,
     HomeIcon,
     ImageIcon,
-    LayoutGridIcon,
-    Link2,
+    LayoutGridIcon, Link2,
     ListIcon,
-    MountainIcon,
-    Pencil,
-    Scissors,
+    MountainIcon, Pencil, Scissors,
     SearchIcon,
-    Settings,
-    Share2,
+    Settings, Share2,
     ShareIcon,
-    StarIcon,
-    Trash,
+    StarIcon, Trash,
     TrashIcon,
     UserPen,
     UsersIcon,
@@ -39,11 +31,8 @@ import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
@@ -55,20 +44,36 @@ import {debounce} from 'lodash';
 import FileUpload from "@/components/FileUpload.tsx";
 import {FloatingUploadCard} from "@/components/FloatingUploadCard.tsx";
 import {AddFolderModal} from "@/components/modals/AddFolderModal.tsx";
-import {format} from "date-fns";
 import {RenameFileModal} from "@/components/modals/RenameFile.tsx";
+import {
+    ContextMenu,
+    ContextMenuCheckboxItem,
+    ContextMenuContent, ContextMenuGroup,
+    ContextMenuItem,
+    ContextMenuLabel,
+    ContextMenuRadioGroup,
+    ContextMenuRadioItem,
+    ContextMenuSeparator,
+    ContextMenuShortcut,
+    ContextMenuSub,
+    ContextMenuSubContent,
+    ContextMenuSubTrigger,
+    ContextMenuTrigger
+} from "@/components/ui/context-menu.tsx";
+import {format} from "date-fns";
 
 
 export default function HomePage() {
     const {'*': path} = useParams();
     const {authState} = useAuth();
+    const navigate = useNavigate();
 
     const [files, setFiles] = useState<FileResponse[]>([]);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [pageSize, setPageSize] = useState(20);
 
-    const [view, setView] = useState("grid");
+    const [view, setView] = useState("list");
     const [favorites, setFavorites] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -453,85 +458,89 @@ export default function HomePage() {
                                 </TableHeader>
                                 <TableBody>
                                     {files.map((item, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>
-                                                <Checkbox/>
-                                            </TableCell>
-                                            <TableCell>
-                                                {mimeToIcon(item.mime, true)}
-                                            </TableCell>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <TableCell
-                                                        className="font-medium">{item.mime !== 'dir' ? item.name : (
-                                                        <Link to={path === '' ? item.name : (`${path}/${item.name}`)}>
-                                                            {item.name}
-                                                        </Link>
-                                                    )}</TableCell>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent className="w-56">
-                                                    <DropdownMenuLabel>{item.name}</DropdownMenuLabel>
-                                                    <DropdownMenuSeparator/>
-                                                    <DropdownMenuGroup>
-                                                        <DropdownMenuItem>
-                                                            <Link2 className="mr-2 h-4 w-4"/>
-                                                            <span>Open in new tab</span>
-                                                            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <ArrowDownToLine className="mr-2 h-4 w-4"/>
-                                                            <span>Download</span>
-                                                            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <Share2 className="mr-2 h-4 w-4"/>
-                                                            <span>Share</span>
-                                                            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuGroup>
-                                                    <DropdownMenuSeparator/>
-                                                    <DropdownMenuItem
-                                                        onClick={() => (item.mime === 'dir' ? {} : handleRenameFile(item.id, item.name))}>
-                                                        <Pencil className="mr-2 h-4 w-4"/>
-                                                        <span>Rename</span>
-                                                        <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator/>
-                                                    <DropdownMenuGroup>
-                                                        <DropdownMenuItem>
-                                                            <Scissors className="mr-2 h-4 w-4"/>
-                                                            <span>Move</span>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <Files className="mr-2 h-4 w-4"/>
-                                                            <span>Copy</span>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuGroup>
-                                                    <DropdownMenuSeparator/>
-                                                    <DropdownMenuGroup>
-                                                        <DropdownMenuItem>
-                                                            <FolderArchive className="mr-2 h-4 w-4"/>
-                                                            <span>Compress</span>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <FolderKanban className="mr-2 h-4 w-4"/>
-                                                            <span>Extract</span>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuGroup>
-                                                    <DropdownMenuSeparator/>
-                                                    <DropdownMenuItem className="text-red-500">
-                                                        <Trash className="mr-2 h-4 w-4"/>
-                                                        <span>Delete</span>
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                            <TableCell className="hidden md:table-cell">
-                                                {formatFileSize(item.size)}
-                                            </TableCell>
-                                            <TableCell className="hidden md:table-cell">
-                                                {format(item.createdAt, "MMMM do, yyyy")}
-                                            </TableCell>
-                                        </TableRow>
+
+                                        <ContextMenu>
+                                            <ContextMenuTrigger>
+                                                <TableRow key={index}>
+                                                    <TableCell>
+                                                        <Checkbox/>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {mimeToIcon(item.mime, true)}
+                                                    </TableCell>
+
+                                                    <TableCell className="font-medium">
+                                                        {item.mime !== 'dir' ? item.name : (
+                                                            <Link
+                                                                to={path === '' ? item.name : (`${path}/${item.name}`)}>
+                                                                {item.name}
+                                                            </Link>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="hidden md:table-cell">
+                                                        {formatFileSize(item.size)}
+                                                    </TableCell>
+                                                    <TableCell className="hidden md:table-cell">
+                                                        {format(item.createdAt, "MMMM do, yyyy")}
+                                                    </TableCell>
+                                                </TableRow>
+                                            </ContextMenuTrigger>
+                                            <ContextMenuContent className="w-64">
+                                                <ContextMenuLabel>{item.name}</ContextMenuLabel>
+                                                <ContextMenuSeparator/>
+                                                <ContextMenuGroup>
+                                                    <ContextMenuItem>
+                                                        <Link2 className="mr-2 h-4 w-4"/>
+                                                        <span>Open in new tab</span>
+                                                        <ContextMenuShortcut>⇧⌘P</ContextMenuShortcut>
+                                                    </ContextMenuItem>
+                                                    <ContextMenuItem>
+                                                        <ArrowDownToLine className="mr-2 h-4 w-4"/>
+                                                        <span>Download</span>
+                                                        <ContextMenuShortcut>⌘B</ContextMenuShortcut>
+                                                    </ContextMenuItem>
+                                                    <ContextMenuItem>
+                                                        <Share2 className="mr-2 h-4 w-4"/>
+                                                        <span>Share</span>
+                                                        <ContextMenuShortcut>⌘S</ContextMenuShortcut>
+                                                    </ContextMenuItem>
+                                                </ContextMenuGroup>
+                                                <ContextMenuSeparator/>
+                                                <ContextMenuItem
+                                                    onClick={() => (item.mime === 'dir' ? {} : handleRenameFile(item.id, item.name))}>
+                                                    <Pencil className="mr-2 h-4 w-4"/>
+                                                    <span>Rename</span>
+                                                    <ContextMenuShortcut>⌘S</ContextMenuShortcut>
+                                                </ContextMenuItem>
+                                                <ContextMenuSeparator/>
+                                                <ContextMenuGroup>
+                                                    <ContextMenuItem>
+                                                        <Scissors className="mr-2 h-4 w-4"/>
+                                                        <span>Move</span>
+                                                    </ContextMenuItem>
+                                                    <ContextMenuItem>
+                                                        <Files className="mr-2 h-4 w-4"/>
+                                                        <span>Copy</span>
+                                                    </ContextMenuItem>
+                                                </ContextMenuGroup>
+                                                <ContextMenuSeparator/>
+                                                <ContextMenuGroup>
+                                                    <ContextMenuItem>
+                                                        <FolderArchive className="mr-2 h-4 w-4"/>
+                                                        <span>Compress</span>
+                                                    </ContextMenuItem>
+                                                    <ContextMenuItem>
+                                                        <FolderKanban className="mr-2 h-4 w-4"/>
+                                                        <span>Extract</span>
+                                                    </ContextMenuItem>
+                                                </ContextMenuGroup>
+                                                <ContextMenuSeparator/>
+                                                <ContextMenuItem className="text-red-500">
+                                                    <Trash className="mr-2 h-4 w-4"/>
+                                                    <span>Delete</span>
+                                                </ContextMenuItem>
+                                            </ContextMenuContent>
+                                        </ContextMenu>
                                     ))}
                                 </TableBody>
                             </Table>
