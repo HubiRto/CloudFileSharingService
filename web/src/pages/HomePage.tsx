@@ -61,6 +61,7 @@ import {
     ContextMenuTrigger
 } from "@/components/ui/context-menu.tsx";
 import {format} from "date-fns";
+import {Sidebar} from "@/components/Sidebar.tsx";
 
 
 export default function HomePage() {
@@ -262,58 +263,7 @@ export default function HomePage() {
 
     return (
         <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
-            <FileUpload
-                isOpen={isUploadModalOpen}
-                onClose={() => setIsUploadModalOpen(false)}
-                onFilesSelected={handleFilesSelected}
-            />
-            <div className="hidden border-r bg-muted/40 lg:block">
-                <div className="flex h-full max-h-screen flex-col gap-2">
-                    <div className="flex h-[60px] items-center border-b px-6">
-                        <div className="flex items-center justify-between w-full">
-                            <Link to="#" className="flex items-center gap-2">
-                                <MountainIcon className="h-6 w-6"/>
-                                <span className="text-lg font-semibold">File Manager</span>
-                            </Link>
-                        </div>
-                    </div>
-                    <div className="flex-1 overflow-auto py-2">
-                        <nav className="grid items-start px-4 text-sm font-medium">
-                            <Link
-                                to="#"
-                                className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-                            >
-                                <FileIcon className="h-4 w-4"/>
-                                My Files
-                            </Link>
-                            <Link
-                                to="#"
-                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-
-                            >
-                                <ShareIcon className="h-4 w-4"/>
-                                Shared by Me
-                            </Link>
-                            <Link
-                                to="#"
-                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-
-                            >
-                                <UsersIcon className="h-4 w-4"/>
-                                Shared for Me
-                            </Link>
-                            <Link
-                                to="#"
-                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-
-                            >
-                                <TrashIcon className="h-4 w-4"/>
-                                Trash
-                            </Link>
-                        </nav>
-                    </div>
-                </div>
-            </div>
+            <Sidebar/>
             <div className="flex flex-col">
                 <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6">
                     <div className="flex items-center justify-between w-full">
@@ -566,6 +516,11 @@ export default function HomePage() {
                     isOpen={isRenameFileModalOpen}
                     onClose={() => setIsRenameFileModalOpen(false)}
                     onRenameComplete={handleRenameFileCompleted}
+                />
+                <FileUpload
+                    isOpen={isUploadModalOpen}
+                    onClose={() => setIsUploadModalOpen(false)}
+                    onFilesSelected={handleFilesSelected}
                 />
             </div>
         </div>
