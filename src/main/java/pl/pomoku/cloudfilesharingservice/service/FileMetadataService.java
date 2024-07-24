@@ -53,10 +53,12 @@ public class FileMetadataService {
         }
 
         FileMetadata parent = file.getParent();
-        parent.setSize(parent.getSize() - file.getSize());
-
         fileMetadataRepository.delete(file);
-        fileMetadataRepository.save(parent);
+
+        if(parent != null) {
+            parent.setSize(parent.getSize() - file.getSize());
+            fileMetadataRepository.save(parent);
+        }
     }
 
     public void renameFile(Long id, RenameRequest request, String token) {
