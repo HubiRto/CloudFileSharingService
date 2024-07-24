@@ -22,8 +22,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -38,6 +36,7 @@ public class FileMetadataService {
     public Page<FileMetadata> findAllByPathAndToken(String path, String token, Pageable pageable) {
         return fileMetadataRepository.findAllByPathAndCreatedBy(path, userService.getUserFromToken(token), pageable);
     }
+
     public Page<FileMetadata> findAllByNameContainingAndToken(String context, String token, Pageable pageable) {
         return fileMetadataRepository.findAllByNameContainingAndCreatedBy(context, userService.getUserFromToken(token), pageable);
     }
@@ -48,14 +47,14 @@ public class FileMetadataService {
         FileMetadata file = fileMetadataRepository.findById(id)
                 .orElseThrow(() -> new AppException("File with this id does not exist", HttpStatus.NOT_FOUND));
 
-        if(!file.getCreatedBy().equals(user)) {
+        if (!file.getCreatedBy().equals(user)) {
             throw new AppException("You don't have permission to this file", HttpStatus.FORBIDDEN);
         }
 
         FileMetadata parent = file.getParent();
         fileMetadataRepository.delete(file);
 
-        if(parent != null) {
+        if (parent != null) {
             parent.setSize(parent.getSize() - file.getSize());
             fileMetadataRepository.save(parent);
         }
@@ -67,11 +66,11 @@ public class FileMetadataService {
         FileMetadata file = fileMetadataRepository.findById(id)
                 .orElseThrow(() -> new AppException("File with this id does not exist", HttpStatus.NOT_FOUND));
 
-        if(!file.getCreatedBy().equals(user)) {
+        if (!file.getCreatedBy().equals(user)) {
             throw new AppException("You don't have permission to this file", HttpStatus.FORBIDDEN);
         }
 
-        if(fileMetadataRepository.existsByNameAndPathAndCreatedBy(request.getNewName(), file.getPath(), user)) {
+        if (fileMetadataRepository.existsByNameAndPathAndCreatedBy(request.getNewName(), file.getPath(), user)) {
             throw new AppException("File or Folder with this name already exists", HttpStatus.CONFLICT);
         }
 
@@ -115,7 +114,7 @@ public class FileMetadataService {
     }
 
     @Transactional
-    public List<FileMetadata> uploadFiles(List<MultipartFile> files, String path, String token) throws IOException {
+    public FileMetadata uploadFile(MultipartFile file, String path, String token) throws IOException {
         User user = userService.getUserFromToken(token);
 
         FileMetadata parent = null;
@@ -128,6 +127,14 @@ public class FileMetadataService {
                     .orElseThrow(() -> new AppException("Parent folder with this path does not exist", HttpStatus.NOT_FOUND));
         }
 
+        if (file.getOriginalFilename() == null) {
+            throw new AppException("Filename is empty", HttpStatus.BAD_REQUEST);
+        }
+
+        if (fileMetadataRepository.existsByNameAndPathAndCreatedBy(StringUtils.cleanPath(file.getOriginalFilename()), path, user)) {
+            throw new AppException("File with this name already exists", HttpStatus.CONFLICT);
+        }
+
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
         String datePath = today.format(formatter);
@@ -138,37 +145,30 @@ public class FileMetadataService {
             Files.createDirectories(uploadPath);
         }
 
-        List<FileMetadata> fileMetadataList = new ArrayList<>();
-        long newFilesSize = 0;
 
-        for (MultipartFile file : files) {
-            String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
-            String fileExtension = originalFileName.contains(".") ? originalFileName.substring(originalFileName.lastIndexOf(".")) : "";
-            String uuidFileName = UUID.randomUUID() + fileExtension;
-            Path filePath = uploadPath.resolve(uuidFileName);
+        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileExtension = originalFileName.contains(".") ? originalFileName.substring(originalFileName.lastIndexOf(".")) : "";
+        String uuidFileName = UUID.randomUUID() + fileExtension;
+        Path filePath = uploadPath.resolve(uuidFileName);
 
-            Files.copy(file.getInputStream(), filePath, REPLACE_EXISTING);
+        Files.copy(file.getInputStream(), filePath, REPLACE_EXISTING);
 
-            FileMetadata newFile = new FileMetadata();
-            newFile.setName(originalFileName);
-            newFile.setPath(path);
-            newFile.setFilePath(uploadPath + "/" + uuidFileName);
-            newFile.setFolder(false);
-            newFile.setMime(file.getContentType());
-            newFile.setSize(file.getSize());
-            newFile.setCreatedAt(LocalDateTime.now());
-            newFile.setCreatedBy(user);
-            newFile.setParent(parent);
+        FileMetadata newFile = new FileMetadata();
+        newFile.setName(originalFileName);
+        newFile.setPath(path);
+        newFile.setFilePath(uploadPath + "/" + uuidFileName);
+        newFile.setFolder(false);
+        newFile.setMime(file.getContentType());
+        newFile.setSize(file.getSize());
+        newFile.setCreatedAt(LocalDateTime.now());
+        newFile.setCreatedBy(user);
+        newFile.setParent(parent);
 
-            newFilesSize += file.getSize();
-            fileMetadataList.add(fileMetadataRepository.save(newFile));
-        }
-
-        if(parent != null) {
-            parent.setSize(parent.getSize() + newFilesSize);
+        if (parent != null) {
+            parent.setSize(parent.getSize() + newFile.getSize());
             fileMetadataRepository.save(parent);
         }
 
-        return fileMetadataList;
+        return fileMetadataRepository.save(newFile);
     }
 }
