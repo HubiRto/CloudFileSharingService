@@ -31,7 +31,6 @@ export const TableView: React.FC<TableViewProps> = ({path}) => {
                             <span className="sr-only">Type</span>
                         </TableHead>
                         <TableHead>Name</TableHead>
-                        <TableHead>Id</TableHead>
                         <TableHead className="hidden md:table-cell">Size</TableHead>
                         <TableHead className="hidden md:table-cell">Modified</TableHead>
                         <TableHead className="w-[40px]">
@@ -60,9 +59,6 @@ export const TableView: React.FC<TableViewProps> = ({path}) => {
                                             {item.name}
                                         </Link>
                                     )}
-                                </TableCell>
-                                <TableCell className="hidden md:table-cell">
-                                    {item.id}
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
                                     {formatFileSize(item.size)}
