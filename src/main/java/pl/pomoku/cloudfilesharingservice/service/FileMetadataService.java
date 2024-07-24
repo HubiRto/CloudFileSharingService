@@ -171,4 +171,59 @@ public class FileMetadataService {
 
         return fileMetadataRepository.save(newFile);
     }
+
+    @Transactional
+    public FileMetadata addNewFile(String fileName, String path, String token) throws IOException {
+        User user = userService.getUserFromToken(token);
+
+        FileMetadata parent = null;
+        if (!path.equals("/")) {
+            int secondToLastSeparatorIndex = path.lastIndexOf('/', path.lastIndexOf("/") - 1);
+            String normalizePath = path.substring(0, secondToLastSeparatorIndex + 1);
+            String name = path.substring(secondToLastSeparatorIndex + 1, path.length() - 1);
+
+            parent = fileMetadataRepository.findByPathAndNameAndCreatedBy(normalizePath, name, user)
+                    .orElseThrow(() -> new AppException("Parent folder with this path does not exist", HttpStatus.NOT_FOUND));
+        }
+
+        if (fileMetadataRepository.existsByNameAndPathAndCreatedBy(StringUtils.cleanPath(fileName), path, user)) {
+            throw new AppException("File with this name already exists", HttpStatus.CONFLICT);
+        }
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String datePath = today.format(formatter);
+
+        Path uploadPath = Paths.get(DIRECTORY, datePath).toAbsolutePath().normalize();
+
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String originalFileName = StringUtils.cleanPath(fileName);
+        String fileExtension = originalFileName.contains(".") ? originalFileName.substring(originalFileName.lastIndexOf(".")) : "";
+        String uuidFileName = UUID.randomUUID() + fileExtension;
+        Path filePath = uploadPath.resolve(uuidFileName);
+
+        // Create an empty file in the system
+        Files.createFile(filePath);
+
+        FileMetadata newFile = new FileMetadata();
+        newFile.setName(originalFileName);
+        newFile.setPath(path);
+        newFile.setFilePath(uploadPath + "/" + uuidFileName);
+        newFile.setFolder(false);
+        newFile.setMime(Files.probeContentType(filePath));
+        newFile.setSize(0L); // Empty file size
+        newFile.setCreatedAt(LocalDateTime.now());
+        newFile.setCreatedBy(user);
+        newFile.setParent(parent);
+
+        if (parent != null) {
+            parent.setSize(parent.getSize() + newFile.getSize());
+            fileMetadataRepository.save(parent);
+        }
+
+        return fileMetadataRepository.save(newFile);
+    }
 }

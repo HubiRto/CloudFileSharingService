@@ -19,7 +19,6 @@ import pl.pomoku.cloudfilesharingservice.mapper.FilesMapper;
 import pl.pomoku.cloudfilesharingservice.service.FileMetadataService;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/files")
@@ -31,16 +30,28 @@ public class FileController {
 
     @Transactional
     @PostMapping("/upload")
-    public ResponseEntity<List<FileMetadataResponse>> uploadFiles(
+    public ResponseEntity<FileMetadataResponse> uploadFiles(
             @NotNull(message = "Token cannot be null")
             @NotEmpty(message = "Token cannot be empty")
             @RequestHeader("Authorization") String token,
 
-            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("file") MultipartFile file,
             @RequestParam("path") String path
     ) throws IOException {
-        return ResponseEntity.ok(fileMetadataService.uploadFiles(files, path, token)
-                .stream().map(filesMapper::mapToResponse).toList());
+        return ResponseEntity.ok(filesMapper.mapToResponse(fileMetadataService.uploadFile(file, path, token)));
+    }
+
+    @Transactional
+    @PostMapping("/addNew")
+    public ResponseEntity<FileMetadataResponse> uploadFiles(
+            @NotNull(message = "Token cannot be null")
+            @NotEmpty(message = "Token cannot be empty")
+            @RequestHeader("Authorization") String token,
+
+            @RequestParam("fileName") String fileName,
+            @RequestParam("path") String path
+    ) throws IOException {
+        return ResponseEntity.ok(filesMapper.mapToResponse(fileMetadataService.addNewFile(fileName, path, token)));
     }
 
     @PostMapping("/folders/add")

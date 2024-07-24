@@ -7,70 +7,54 @@ import {useForm} from "react-hook-form"
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Form, FormControl, FormField, FormItem, FormMessage} from "@/components/ui/form.tsx";
 import axios from "axios";
-import toast from "react-hot-toast";
-import {useAuth} from "@/providers/AuthContext.tsx";
 import {FileData} from "@/models/FileData.ts";
 import {Modal} from "@/components/modals/Modal.tsx";
 import {useFileContext} from "@/providers/FileProvider.tsx";
+import toast from "react-hot-toast";
+import {useAuth} from "@/providers/AuthContext.tsx";
 
 type Props = React.PropsWithChildren<{
-    file: FileData;
     isOpen: boolean;
     onClose: () => void;
+    path: string;
 }>
 
 const formSchema = z.object({
-    name: z.string().min(2, {
+    name: z.string().min(5, {
         message: "Name must be at least 5 characters.",
     }),
 })
 
-function changeFileName(fullFileName: string, newName: string): string {
-    const dotIndex = fullFileName.lastIndexOf('.');
-    if (dotIndex === -1) {
-        throw new Error('File does not have an extension');
-    }
-    const extension = fullFileName.substring(dotIndex);
-    return newName + extension;
-}
-
-export const RenameFileModal = ({file, isOpen, onClose}: Props) => {
+export const AddFileModal = ({isOpen, onClose, path}: Props) => {
+    const {addFile} = useFileContext();
     const {authState} = useAuth();
-    const {renameFile} = useFileContext();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
         },
-    });
-
-    useEffect(() => {
-        form.reset();
-    }, [isOpen]);
+    })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!authState?.token) return;
 
-        await axios.patch<string>(`http://127.0.0.1:8080/api/v1/files/rename/${file.id}`, {
-            newName: values.name
-        }, {
+        console.log(values.name);
+
+        await axios.post<FileData>(`http://127.0.0.1:8080/api/v1/files/addNew?path=${path}&fileName=${values.name}`, undefined, {
             headers: {
                 Authorization: `Bearer ${authState?.token}`
             },
         })
             .then((res) => {
-                renameFile(file.name, changeFileName(file.name, values.name));
+                addFile(res.data);
                 onClose();
-                toast.success(res.data);
+                toast.success("Successfully added file");
             })
             .catch((err: any) => {
                 if (!err.response) console.log(err);
-                const code: number = err.response.status;
-
-                if (code === 409) {
-                    form.setError("name", {message: err.response.data.error as string})
-                }
+                toast.error(`Failed to create ${form.getValues("name")}!`);
+                toast.error(err.response.data.error);
             })
     }
 
@@ -79,7 +63,7 @@ export const RenameFileModal = ({file, isOpen, onClose}: Props) => {
     }, [isOpen]);
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Rename File">
+        <Modal isOpen={isOpen} onClose={onClose} title="Add File">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField
@@ -88,14 +72,14 @@ export const RenameFileModal = ({file, isOpen, onClose}: Props) => {
                         render={({field}) => (
                             <FormItem>
                                 <FormControl>
-                                    <Input placeholder="New file name..." {...field} />
+                                    <Input placeholder="File Name..." {...field} />
                                 </FormControl>
                                 <FormMessage/>
                             </FormItem>
                         )}
                     />
                     <DialogFooter>
-                        <Button type="submit">Rename</Button>
+                        <Button type="submit">Add Folder</Button>
                     </DialogFooter>
                 </form>
             </Form>

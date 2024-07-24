@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
+import {DialogFooter} from "@/components/ui/dialog.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {z} from "zod";
@@ -7,13 +7,15 @@ import {useForm} from "react-hook-form"
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Form, FormControl, FormField, FormItem, FormMessage} from "@/components/ui/form.tsx";
 import axios from "axios";
-import {FileResponse} from "@/models/FileResponse.ts";
+import {FileData} from "@/models/FileData.ts";
+import {Modal} from "@/components/modals/Modal.tsx";
+import {useFileContext} from "@/providers/FileProvider.tsx";
+import toast from "react-hot-toast";
 
 type Props = React.PropsWithChildren<{
     isOpen: boolean;
     onClose: () => void;
     path: string;
-    onAddComplete: (res: FileResponse) => void;
 }>
 
 const formSchema = z.object({
@@ -22,7 +24,9 @@ const formSchema = z.object({
     }),
 })
 
-export const AddFolderModal = ({isOpen, onClose, path, onAddComplete}: Props) => {
+export const AddFolderModal = ({isOpen, onClose, path}: Props) => {
+    const {addFile} = useFileContext();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -31,12 +35,14 @@ export const AddFolderModal = ({isOpen, onClose, path, onAddComplete}: Props) =>
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        await axios.post<FileResponse>('http://127.0.0.1:8080/api/v1/files/folders/add', {
+        await axios.post<FileData>('http://127.0.0.1:8080/api/v1/files/folders/add', {
             name: values.name,
             path: path
         })
             .then((res) => {
-                onAddComplete(res.data);
+                addFile(res.data);
+                onClose();
+                toast.success("Successfully added folder");
             })
             .catch((err: any) => {
                 if (!err.response) console.log(err);
@@ -53,31 +59,26 @@ export const AddFolderModal = ({isOpen, onClose, path, onAddComplete}: Props) =>
     }, [isOpen]);
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Add Folder</DialogTitle>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Input placeholder="Folder Name..." {...field} />
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-                        <DialogFooter>
-                            <Button type="submit">Add Folder</Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
+        <Modal isOpen={isOpen} onClose={onClose} title="Add Folder">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                        control={form.control}
+                        name="name"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Input placeholder="Folder Name..." {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <DialogFooter>
+                        <Button type="submit">Add Folder</Button>
+                    </DialogFooter>
+                </form>
+            </Form>
+        </Modal>
     )
 }

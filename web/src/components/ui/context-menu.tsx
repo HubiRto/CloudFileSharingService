@@ -6,15 +6,7 @@ import { cn } from "@/lib/utils"
 
 const ContextMenu = ContextMenuPrimitive.Root
 
-const ContextMenuTrigger = React.forwardRef<
-    React.ElementRef<typeof ContextMenuPrimitive.Trigger>,
-    React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Trigger>
->(({ children, ...props }, ref) => (
-    <ContextMenuPrimitive.Trigger ref={ref} {...props} style={{ display: 'contents' }}>
-        {children}
-    </ContextMenuPrimitive.Trigger>
-))
-ContextMenuTrigger.displayName = ContextMenuPrimitive.Trigger.displayName
+const ContextMenuTrigger = ContextMenuPrimitive.Trigger
 
 const ContextMenuGroup = ContextMenuPrimitive.Group
 
