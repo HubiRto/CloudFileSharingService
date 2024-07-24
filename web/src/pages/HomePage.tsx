@@ -5,12 +5,16 @@ import {Button} from "@/components/ui/button"
 import {
     CloudUpload,
     FilePlus2,
+    Files,
+    FolderArchive,
     FolderPlus,
     HomeIcon,
     LayoutGridIcon,
     ListIcon,
+    Scissors,
     SearchIcon,
     Settings,
+    Trash,
     UserPen
 } from "lucide-react";
 import React, {useEffect, useState} from "react";
@@ -40,12 +44,14 @@ import {RenameFileModal} from "@/components/modals/RenameFile.tsx";
 import {FloatingUploadCardProvider} from "@/providers/FloatingUploadCardProvider.tsx";
 import FloatingUploadCard from "@/components/FloatingUploadCard.tsx";
 import {AddFileModal} from "@/components/modals/AddFileModal.tsx";
+import {useSelectFileContext} from "@/providers/SelectFileProvider.tsx";
 
 
 export default function HomePage() {
     const {'*': path} = useParams();
     const {authState} = useAuth();
     const {openModal, closeModal, isOpen, getModalData} = useModal();
+    const {selectedFiles, isAnySelect} = useSelectFileContext();
 
     const {removeAllFiles, addFiles, setFiles, files} = useFileContext();
     const [page, setPage] = useState(0);
@@ -54,6 +60,20 @@ export default function HomePage() {
 
     const [view, setView] = useState("list");
     const [searchQuery, setSearchQuery] = useState("");
+
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [currentSelect, setCurrentSelect] = useState(isAnySelect);
+
+    useEffect(() => {
+        if (isAnySelect !== currentSelect) {
+            setIsAnimating(true);
+            setTimeout(() => {
+                setCurrentSelect(isAnySelect);
+                setIsAnimating(false);
+            }, 400); // Match the duration of the CSS transition
+        }
+    }, [isAnySelect, currentSelect]);
+
 
     useEffect(() => {
         removeAllFiles();
@@ -126,6 +146,7 @@ export default function HomePage() {
         setSearchQuery(query);
         handleSearch(query);
     };
+
 
     const generateBreadcrumbs = () => {
         const pathArray = path?.split("/").filter((p) => p);
@@ -216,23 +237,56 @@ export default function HomePage() {
                         </div>
                     </header>
                     <header
-                        className={`flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6 transition-all duration-400 ease-in-out ${searchQuery ? 'max-h-0 opacity-0' : 'max-h-40 opacity-100'}`}>
+                        className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6 overflow-hidden">
                         <div className="flex items-center justify-between w-full">
                             {generateBreadcrumbs()}
-                            <div className="flex items-center gap-2">
-                                <Button size="sm" className="h-8 gap-1" onClick={() => openModal("upload")}>
-                                    <CloudUpload className="h-3.5 w-3.5"/>
-                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Upload</span>
-                                </Button>
-                                <Button variant="outline" size="sm" className="h-8 gap-1"
-                                        onClick={() => openModal('addFolder')}>
-                                    <FolderPlus className="h-3.5 w-3.5"/>
-                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">New folder</span>
-                                </Button>
-                                <Button variant="outline" size="sm" className="h-8 gap-1" onClick={() => openModal("addFile")}>
-                                    <FilePlus2 className="h-3.5 w-3.5"/>
-                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">New file</span>
-                                </Button>
+                            <div
+                                className={`flex items-center gap-2 transition-all duration-400 ease-in-out ${
+                                    isAnimating ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'
+                                }`}
+                                style={{transition: 'transform 0.4s ease-in-out, opacity 0.4s ease-in-out'}}
+                            >
+                                {!currentSelect ? (
+                                    <>
+                                        <Button size="sm" className="h-8 gap-1" onClick={() => openModal('upload')}>
+                                            <CloudUpload className="h-3.5 w-3.5"/>
+                                            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Upload</span>
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="h-8 gap-1"
+                                                onClick={() => openModal('addFolder')}>
+                                            <FolderPlus className="h-3.5 w-3.5"/>
+                                            <span
+                                                className="sr-only sm:not-sr-only sm:whitespace-nowrap">New folder</span>
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="h-8 gap-1"
+                                                onClick={() => openModal('addFile')}>
+                                            <FilePlus2 className="h-3.5 w-3.5"/>
+                                            <span
+                                                className="sr-only sm:not-sr-only sm:whitespace-nowrap">New file</span>
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p>{selectedFiles.length} selected</p>
+                                        <Button variant="outline" size="sm" className="h-8 gap-1">
+                                            <FolderArchive className="h-3.5 w-3.5"/>
+                                            <span
+                                                className="sr-only sm:not-sr-only sm:whitespace-nowrap">Compress</span>
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="h-8 gap-1">
+                                            <Files className="h-3.5 w-3.5"/>
+                                            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Copy</span>
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="h-8 gap-1">
+                                            <Scissors className="h-3.5 w-3.5"/>
+                                            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Move</span>
+                                        </Button>
+                                        <Button size="sm" className="h-8 gap-1 bg-red-600">
+                                            <Trash className="h-3.5 w-3.5"/>
+                                            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Delete</span>
+                                        </Button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </header>
@@ -250,7 +304,9 @@ export default function HomePage() {
                         >
                             {view === "grid" ?
                                 <GridView files={files} path={path!}/> :
-                                <TableView path={path!}/>
+                                <TableView
+                                    path={path!}
+                                />
                             }
                         </InfiniteScroll>
                     </main>

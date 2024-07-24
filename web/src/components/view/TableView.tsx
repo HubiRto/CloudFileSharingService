@@ -7,6 +7,7 @@ import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {format} from "date-fns";
 import {useFileContext} from "@/providers/FileProvider.tsx";
 import {FileContextMenu} from "@/components/contxtMenu/FileContextMenu.tsx";
+import {useSelectFileContext} from "@/providers/SelectFileProvider.tsx";
 
 type TableViewProps = {
     path: string;
@@ -14,6 +15,7 @@ type TableViewProps = {
 
 export const TableView: React.FC<TableViewProps> = ({path}) => {
     const {files} = useFileContext();
+    const {selectAll, selectFile, selectedFiles} = useSelectFileContext();
 
     if (!files) return null;
 
@@ -23,12 +25,13 @@ export const TableView: React.FC<TableViewProps> = ({path}) => {
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[40px]">
-                            <Checkbox/>
+                            <Checkbox onCheckedChange={selectAll} />
                         </TableHead>
                         <TableHead className="w-[40px]">
                             <span className="sr-only">Type</span>
                         </TableHead>
                         <TableHead>Name</TableHead>
+                        <TableHead>Id</TableHead>
                         <TableHead className="hidden md:table-cell">Size</TableHead>
                         <TableHead className="hidden md:table-cell">Modified</TableHead>
                         <TableHead className="w-[40px]">
@@ -41,7 +44,10 @@ export const TableView: React.FC<TableViewProps> = ({path}) => {
                         <FileContextMenu file={item} key={index}>
                             <TableRow>
                                 <TableCell>
-                                    <Checkbox/>
+                                    <Checkbox
+                                        checked={selectedFiles.includes(item.id)}
+                                        onCheckedChange={(isChecked) => selectFile(item.id, isChecked as boolean)}
+                                    />
                                 </TableCell>
                                 <TableCell>
                                     {mimeToIcon(item.mime, 5)}
@@ -54,6 +60,9 @@ export const TableView: React.FC<TableViewProps> = ({path}) => {
                                             {item.name}
                                         </Link>
                                     )}
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                    {item.id}
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
                                     {formatFileSize(item.size)}
