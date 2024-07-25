@@ -60,7 +60,29 @@ public class FileMetadataService {
         }
     }
 
-    public void renameFile(Long id, RenameRequest request, String token) {
+    @Transactional
+    public void deleteFiles(Long[] ids, String token) {
+        User user = userService.getUserFromToken(token);
+
+        for(Long id : ids) {
+            FileMetadata file = fileMetadataRepository.findById(id)
+                    .orElseThrow(() -> new AppException("File with this id does not exist", HttpStatus.NOT_FOUND));
+
+            if (!file.getCreatedBy().equals(user)) {
+                throw new AppException("You don't have permission to this file", HttpStatus.FORBIDDEN);
+            }
+
+            FileMetadata parent = file.getParent();
+            fileMetadataRepository.delete(file);
+
+            if (parent != null) {
+                parent.setSize(parent.getSize() - file.getSize());
+                fileMetadataRepository.save(parent);
+            }
+        }
+    }
+
+    public FileMetadata renameFile(Long id, RenameRequest request, String token) {
         User user = userService.getUserFromToken(token);
 
         FileMetadata file = fileMetadataRepository.findById(id)
@@ -78,7 +100,8 @@ public class FileMetadataService {
         String extension = file.getName().substring(indexOfExtensionDot);
 
         file.setName(request.getNewName() + extension);
-        fileMetadataRepository.save(file);
+        file.setLastModifiedAt(LocalDateTime.now());
+        return fileMetadataRepository.save(file);
     }
 
     public FileMetadata addFolder(AddFolderRequest request, String token) {

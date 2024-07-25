@@ -93,15 +93,14 @@ public class FileController {
     }
 
     @PatchMapping("/rename/{id}")
-    public ResponseEntity<String> renameFile(
+    public ResponseEntity<FileMetadata> renameFile(
             @NotNull(message = "Token cannot be null")
             @NotEmpty(message = "Token cannot be empty")
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody RenameRequest request,
             @PathVariable Long id
     ) {
-        fileMetadataService.renameFile(id, request, token);
-        return ResponseEntity.ok("Successfully renamed file");
+        return ResponseEntity.ok(fileMetadataService.renameFile(id, request, token));
     }
 
     @DeleteMapping("/delete/{id}")
@@ -113,5 +112,16 @@ public class FileController {
     ) {
         fileMetadataService.deleteFile(id, token);
         return ResponseEntity.ok("Successfully deleted file");
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteFiles(
+            @NotNull(message = "Token cannot be null")
+            @NotEmpty(message = "Token cannot be empty")
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long[] ids
+    ) {
+        fileMetadataService.deleteFiles(ids, token);
+        return ResponseEntity.ok("Successfully deleted %d files".formatted(ids.length));
     }
 }

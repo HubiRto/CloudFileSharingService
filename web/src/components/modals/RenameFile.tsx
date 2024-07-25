@@ -52,7 +52,7 @@ export const RenameFileModal = ({file, isOpen, onClose}: Props) => {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!authState?.token) return;
 
-        await axios.patch<string>(`http://127.0.0.1:8080/api/v1/files/rename/${file.id}`, {
+        await axios.patch<FileData>(`http://127.0.0.1:8080/api/v1/files/rename/${file.id}`, {
             newName: values.name
         }, {
             headers: {
@@ -60,9 +60,10 @@ export const RenameFileModal = ({file, isOpen, onClose}: Props) => {
             },
         })
             .then((res) => {
-                renameFile(file.name, changeFileName(file.name, values.name));
+                console.log(res);
+                renameFile(file.name, changeFileName(file.name, values.name), res.data.lastModifiedAt);
                 onClose();
-                toast.success(res.data);
+                toast.success("Successfully renamed file");
             })
             .catch((err: any) => {
                 if (!err.response) console.log(err);

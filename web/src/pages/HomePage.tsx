@@ -45,6 +45,7 @@ import {FloatingUploadCardProvider} from "@/providers/FloatingUploadCardProvider
 import FloatingUploadCard from "@/components/FloatingUploadCard.tsx";
 import {AddFileModal} from "@/components/modals/AddFileModal.tsx";
 import {useSelectFileContext} from "@/providers/SelectFileProvider.tsx";
+import toast from "react-hot-toast";
 
 
 export default function HomePage() {
@@ -52,8 +53,8 @@ export default function HomePage() {
     const {authState} = useAuth();
     const {openModal, closeModal, isOpen, getModalData} = useModal();
     const {selectedFiles, isAnySelect} = useSelectFileContext();
+    const {removeAllFiles, addFiles, setFiles, files, removeFiles} = useFileContext();
 
-    const {removeAllFiles, addFiles, setFiles, files} = useFileContext();
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [pageSize] = useState(20);
@@ -146,6 +147,24 @@ export default function HomePage() {
         setSearchQuery(query);
         handleSearch(query);
     };
+
+    const handleRemoveFiles = async () => {
+        if (!authState?.token) return;
+
+        await axios.delete<string>(`http://127.0.0.1:8080/api/v1/files/delete?ids=${selectedFiles}`, {
+            headers: {
+                Authorization: `Bearer ${authState?.token}`
+            },
+        })
+            .then((res) => {
+                removeFiles(selectedFiles);
+                toast.success(res.data);
+            })
+            .catch((err: any) => {
+                if (!err.response) console.log(err);
+                toast.error(err.response.data.error as string);
+            })
+    }
 
 
     const generateBreadcrumbs = () => {
@@ -281,7 +300,7 @@ export default function HomePage() {
                                             <Scissors className="h-3.5 w-3.5"/>
                                             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Move</span>
                                         </Button>
-                                        <Button size="sm" className="h-8 gap-1 bg-red-600">
+                                        <Button size="sm" className="h-8 gap-1 bg-red-600" onClick={() => handleRemoveFiles()}>
                                             <Trash className="h-3.5 w-3.5"/>
                                             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Delete</span>
                                         </Button>

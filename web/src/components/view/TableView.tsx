@@ -32,10 +32,8 @@ export const TableView: React.FC<TableViewProps> = ({path}) => {
                         </TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead className="hidden md:table-cell">Size</TableHead>
-                        <TableHead className="hidden md:table-cell">Modified</TableHead>
-                        <TableHead className="w-[40px]">
-                            <span className="sr-only">Actions</span>
-                        </TableHead>
+                        <TableHead className="hidden md:table-cell">Created At</TableHead>
+                        <TableHead className="hidden md:table-cell">Last Modified</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -64,7 +62,10 @@ export const TableView: React.FC<TableViewProps> = ({path}) => {
                                     {formatFileSize(item.size)}
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
-                                    {format(item.createdAt, "MMMM do, yyyy")}
+                                    {format(item.createdAt, "MMM dd, yyyy - HH:mm")}
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                    {item.lastModifiedAt ? format(item.lastModifiedAt, "MMM dd, yyyy - HH:mm") : ""}
                                 </TableCell>
                             </TableRow>
                         </FileContextMenu>

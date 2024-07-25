@@ -6,9 +6,10 @@ interface FileContextType {
     addFile: (file: FileData) => void;
     addFiles: (files: FileData[]) => void;
     removeFile: (fileName: string) => void;
+    removeFiles: (ids: number[]) => void;
     removeAllFiles: () => void;
     setFiles: (newFiles: FileData[]) => void;
-    renameFile: (oldName: string, newName: string) => void;
+    renameFile: (oldName: string, newName: string, newLastUpdatedAt: string) => void;
 }
 
 const FileContext = createContext<FileContextType | undefined>(undefined);
@@ -28,6 +29,10 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({children}) => {
         setFiles(prevFiles => prevFiles.filter(file => file.name !== fileName));
     };
 
+    const removeFiles = (ids: number[]) => {
+        setFiles((prevFiles) => prevFiles.filter((file) => !ids.includes(file.id)));
+    };
+
     const removeAllFiles = () => {
         setFiles([]);
     };
@@ -36,10 +41,10 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({children}) => {
         setFiles(newFiles);
     };
 
-    const renameFile = (oldName: string, newName: string) => {
+    const renameFile = (oldName: string, newName: string, newLastUpdatedAt: string) => {
         setFiles(prevFiles =>
             prevFiles.map(file =>
-                file.name === oldName ? {...file, name: newName} : file
+                file.name === oldName ? {...file, name: newName, lastModifiedAt: newLastUpdatedAt} : file
             )
         );
     }
@@ -47,7 +52,7 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({children}) => {
 
     return (
         <FileContext.Provider
-            value={{files, addFile, addFiles, removeFile, removeAllFiles, setFiles: setNewFiles, renameFile}}>
+            value={{files, addFile, addFiles, removeFile, removeFiles, removeAllFiles, setFiles: setNewFiles, renameFile}}>
             {children}
         </FileContext.Provider>
     );
