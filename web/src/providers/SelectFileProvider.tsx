@@ -6,6 +6,7 @@ interface SelectFileContextType {
     isAnySelect: boolean;
     selectAll: (isChecked: boolean) => void;
     selectFile: (fileId: number, isChecked: boolean) => void;
+    clear: () => void;
 }
 
 const SelectFileContext = createContext<SelectFileContextType | undefined>(undefined);
@@ -29,11 +30,15 @@ export const SelectFileProvider: React.FC<{ children: ReactNode }> = ({children}
         );
     };
 
+    const clear = () => {
+        setSelectedFiles([]);
+    }
+
     const isAnySelect = selectedFiles.length > 0;
 
     return (
         <SelectFileContext.Provider
-            value={{selectedFiles, isAnySelect, selectAll, selectFile}}>
+            value={{selectedFiles, isAnySelect, selectAll, selectFile, clear}}>
             {children}
         </SelectFileContext.Provider>
     );

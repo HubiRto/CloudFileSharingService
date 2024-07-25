@@ -52,14 +52,14 @@ export default function HomePage() {
     const {'*': path} = useParams();
     const {authState} = useAuth();
     const {openModal, closeModal, isOpen, getModalData} = useModal();
-    const {selectedFiles, isAnySelect} = useSelectFileContext();
+    const {selectedFiles, isAnySelect, clear} = useSelectFileContext();
     const {removeAllFiles, addFiles, setFiles, files, removeFiles} = useFileContext();
 
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [pageSize] = useState(20);
 
-    const [view, setView] = useState("list");
+    const [view, setView] = useState("grid");
     const [searchQuery, setSearchQuery] = useState("");
 
     const [isAnimating, setIsAnimating] = useState(false);
@@ -78,6 +78,7 @@ export default function HomePage() {
 
     useEffect(() => {
         removeAllFiles();
+        clear();
         setPage(0);
         setHasMore(true);
         fetchFiles(0, pageSize);
@@ -300,7 +301,10 @@ export default function HomePage() {
                                             <Scissors className="h-3.5 w-3.5"/>
                                             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Move</span>
                                         </Button>
-                                        <Button size="sm" className="h-8 gap-1 bg-red-600" onClick={() => handleRemoveFiles()}>
+                                        <Button size="sm" className="h-8 gap-1 bg-red-600" onClick={() => {
+                                            handleRemoveFiles();
+                                            clear();
+                                        }}>
                                             <Trash className="h-3.5 w-3.5"/>
                                             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Delete</span>
                                         </Button>
