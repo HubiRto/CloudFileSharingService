@@ -18,4 +18,5 @@ public class FileMetadataResponse {
     private long size;
     private LocalDateTime createdAt;
     private LocalDateTime lastModifiedAt;
+    private String owner;
 }

@@ -1,7 +1,7 @@
 import {useParams} from "react-router-dom";
 import {Input} from "@/components/ui/input"
 import {Button} from "@/components/ui/button"
-import {LayoutGridIcon, ListIcon, SearchIcon, Settings, UserPen} from "lucide-react";
+import {LayoutGridIcon, ListIcon, LogOut, SearchIcon, Settings, UserPen} from "lucide-react";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {FileData} from "@/models/FileData.ts";
@@ -19,15 +19,15 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import {ModeToggle} from "@/components/ModeToggle.tsx";
 import {debounce} from 'lodash';
 import {Sidebar} from "@/components/Sidebar.tsx";
-import {GridView} from "@/components/view/GridView.tsx";
-import {TableView} from "@/components/view/TableView.tsx";
 import {FloatingUploadCardProvider} from "@/providers/FloatingUploadCardProvider.tsx";
 import {useShareFileContext} from "@/providers/ShareFileProvider.tsx";
+import {ShareFormMeGridView} from "@/components/view/shareForMe/ShareFormMeGridView.tsx";
+import {ShareFormMeTableView} from "@/components/view/shareForMe/ShareFormMeTableView.tsx";
 
 
 export default function ShareForMePage() {
     const {'*': path} = useParams();
-    const {authState} = useAuth();
+    const {authState, onLogout} = useAuth();
     const {removeAllFiles, addFiles, setFiles, files} = useShareFileContext();
 
     const [page, setPage] = useState(0);
@@ -159,13 +159,17 @@ export default function ShareForMePage() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem>
-                                            <UserPen className="h-4 w-4 mr-2"/>
-                                            Profile
+                                            <Settings className="h-4 w-4 mr-2"/>
+                                            Settings
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator/>
                                         <DropdownMenuItem>
-                                            <Settings className="h-4 w-4 mr-2"/>
-                                            Settings
+                                            <UserPen className="h-4 w-4 mr-2"/>
+                                            Profile
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={onLogout}>
+                                            <LogOut className="h-4 w-4 mr-2"/>
+                                            Logout
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -185,8 +189,8 @@ export default function ShareForMePage() {
                             scrollableTarget="main"
                         >
                             {view === "grid" ?
-                                <GridView files={files} path={path!}/> :
-                                <TableView files={files} path={path!}/>
+                                <ShareFormMeGridView files={files} path={path!}/> :
+                                <ShareFormMeTableView files={files} path={path!}/>
                             }
                         </InfiniteScroll>
                     </main>

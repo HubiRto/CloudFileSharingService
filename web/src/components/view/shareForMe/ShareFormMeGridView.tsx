@@ -1,26 +1,26 @@
 import {FileData} from "@/models/FileData.ts";
 import React from "react";
 import {useNavigate} from "react-router-dom";
-import {Heart} from "lucide-react";
+import {StarIcon} from "lucide-react";
 import {formatFileSize} from "@/utils/formatFileSizeUtil.ts";
-import {FileContextMenu} from "@/components/contxtMenu/FileContextMenu.tsx";
 import {useSelectFileContext} from "@/providers/SelectFileProvider.tsx";
 import AsyncImage from "@/components/AsyncImage.tsx";
 import {mimeToIcon} from "@/utils/mimeUtils.tsx";
+import {ShareForeMeFileContextMenu} from "@/components/contxtMenu/ShareForMeFileContextMenu.tsx";
 
-type GridViewProps = {
+type ShareFormMeGridViewProps = {
     files: FileData[];
     path: string;
 };
 
-export const GridView: React.FC<GridViewProps> = ({files, path}) => {
+export const ShareFormMeGridView: React.FC<ShareFormMeGridViewProps> = ({files, path}) => {
     const navigate = useNavigate();
     const {selectFile, selectedFiles} = useSelectFileContext();
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {files.map((file, index) => (
-                <FileContextMenu file={file} key={index}>
+                <ShareForeMeFileContextMenu file={file} key={index}>
                     <div
                         key={index}
                         className={`
@@ -45,21 +45,21 @@ export const GridView: React.FC<GridViewProps> = ({files, path}) => {
                             className={`p-4 ${selectedFiles.includes(file.id) ? 'bg-blue-200' : 'bg-background'}`}
                             onClick={() => {
                                 if (file.mime === 'dir') {
-                                    navigate(`/my-files/${path === '' ? file.name : `${path}/${file.name}`}`)
+                                    navigate(`/shared-with-me/${path === '' ? file.name : `${path}/${file.name}`}`)
                                 }
                             }}
                         >
-                            <h3 className="text-lg font-medium truncate">{file.name}</h3>
+                            <h3 className="text-lg font-medium truncate">{file.name}  ({file.owner})</h3>
                             <div
                                 className="flex items-center justify-between text-sm text-muted-foreground">
                                 <div>{formatFileSize(file.size)}</div>
                                 <div>
-                                    <Heart className={`h-4 w-4 text-red-800`}/>
+                                    <StarIcon className={`h-4 w-4 fill-primary`}/>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </FileContextMenu>
+                </ShareForeMeFileContextMenu>
             ))}
         </div>
     );

@@ -22,8 +22,36 @@ public class ShareController {
     private final FilesMapper filesMapper;
     private final FileSharingService fileSharingService;
 
+    @GetMapping("/shared-by-me/path")
+    public ResponseEntity<Page<FileMetadataResponse>> getShareByMePageByPath(
+            @NotNull(message = "Token cannot be null")
+            @NotEmpty(message = "Token cannot be empty")
+            @RequestHeader("Authorization") String token,
+            @RequestParam(value = "path") String path,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size
+    ) {
+        Page<FileShare> filePage = fileSharingService.getSharedFilesByPath(token, path, PageRequest.of(page, size));
+        Page<FileMetadataResponse> responsePage = filePage.map((fileShare) -> filesMapper.mapToResponse(fileShare.getFile()));
+        return ResponseEntity.ok(responsePage);
+    }
+
+    @GetMapping("/shared-by-me/context")
+    public ResponseEntity<Page<FileMetadataResponse>> getShareByMePageByContext(
+            @NotNull(message = "Token cannot be null")
+            @NotEmpty(message = "Token cannot be empty")
+            @RequestHeader("Authorization") String token,
+            @RequestParam(value = "context") String context,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size
+    ) {
+        Page<FileShare> filePage = fileSharingService.getSharedFilesByContext(token, context, PageRequest.of(page, size));
+        Page<FileMetadataResponse> responsePage = filePage.map((fileShare) -> filesMapper.mapToResponse(fileShare.getFile()));
+        return ResponseEntity.ok(responsePage);
+    }
+
     @GetMapping("/shared-with-me/path")
-    public ResponseEntity<Page<FileMetadataResponse>> getPageByPath(
+    public ResponseEntity<Page<FileMetadataResponse>> getShareWithMePageByPath(
             @NotNull(message = "Token cannot be null")
             @NotEmpty(message = "Token cannot be empty")
             @RequestHeader("Authorization") String token,
@@ -37,7 +65,7 @@ public class ShareController {
     }
 
     @GetMapping("/shared-with-me/context")
-    public ResponseEntity<Page<FileMetadataResponse>> getPageByContext(
+    public ResponseEntity<Page<FileMetadataResponse>> getShareWithMePageByContext(
             @NotNull(message = "Token cannot be null")
             @NotEmpty(message = "Token cannot be empty")
             @RequestHeader("Authorization") String token,

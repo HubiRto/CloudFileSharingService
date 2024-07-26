@@ -10,7 +10,7 @@ import {
     FolderPlus,
     HomeIcon,
     LayoutGridIcon,
-    ListIcon,
+    ListIcon, LogOut,
     Scissors,
     SearchIcon,
     Settings,
@@ -52,7 +52,7 @@ import {ShareFileModal} from "@/components/modals/ShareFileModal.tsx";
 
 export default function HomePage() {
     const {'*': path} = useParams();
-    const {authState} = useAuth();
+    const {authState, onLogout} = useAuth();
     const {openModal, closeModal, isOpen, getModalData} = useModal();
     const {selectedFiles, isAnySelect, clear} = useSelectFileContext();
     const {removeAllFiles, addFiles, setFiles, files, removeFiles} = useFileContext();
@@ -143,7 +143,7 @@ export default function HomePage() {
                 console.error('Error searching files:', error);
             }
         }
-    }, 250);
+    }, 300);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const query = event.target.value;
@@ -245,13 +245,17 @@ export default function HomePage() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem>
-                                            <UserPen className="h-4 w-4 mr-2"/>
-                                            Profile
+                                            <Settings className="h-4 w-4 mr-2"/>
+                                            Settings
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator/>
                                         <DropdownMenuItem>
-                                            <Settings className="h-4 w-4 mr-2"/>
-                                            Settings
+                                            <UserPen className="h-4 w-4 mr-2"/>
+                                            Profile
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={onLogout}>
+                                            <LogOut className="h-4 w-4 mr-2"/>
+                                            Logout
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -270,7 +274,7 @@ export default function HomePage() {
                             >
                                 {!currentSelect ? (
                                     <>
-                                        <Button size="sm" className="h-8 gap-1" onClick={() => openModal('upload')}>
+                                        <Button size="sm" className="h-8 gap-1 bg-blue-400 hover:bg-blue-600" onClick={() => openModal('upload')}>
                                             <CloudUpload className="h-3.5 w-3.5"/>
                                             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Upload</span>
                                         </Button>

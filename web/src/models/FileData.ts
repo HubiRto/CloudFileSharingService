@@ -7,4 +7,5 @@ export interface FileData {
     size: number;
     createdAt: string;
     lastModifiedAt: string;
+    owner: string;
 }

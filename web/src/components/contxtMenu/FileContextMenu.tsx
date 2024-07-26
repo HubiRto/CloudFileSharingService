@@ -68,7 +68,7 @@ export const FileContextMenu = ({file, children}: Props) => {
                     <ContextMenuLabel>{file.name}</ContextMenuLabel>
                     <ContextMenuSeparator/>
                     <ContextMenuGroup>
-                        <ContextMenuItem>
+                        <ContextMenuItem onClick={() => window.open(`http://localhost:5173/my-files${file.path}${file.name}`)}>
                             <Link2 className="mr-2 h-4 w-4"/>
                             <span>Open in new tab</span>
                             <ContextMenuShortcut>⇧⌘P</ContextMenuShortcut>
