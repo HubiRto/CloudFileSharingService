@@ -39,4 +39,7 @@ public class FileMetadata {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FileMetadata> children;
+
+    @OneToMany(mappedBy = "file", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FileShare> shares;
 }

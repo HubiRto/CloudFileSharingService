@@ -10,6 +10,7 @@ import RegisterPage from "@/pages/auth/RegisterPage.tsx";
 import {AuthProvider} from "@/providers/AuthContext.tsx";
 import {ToastProvider} from "@/providers/ToastProvider.tsx";
 import {ThemeProvider} from "@/providers/ThemeProvider.tsx";
+import ShareForMePage from "@/pages/ShareForMePage.tsx";
 
 const wrapWithProtectedRoute = (element: React.ReactNode) => <ProtectedRouteWrapper children={element}/>;
 
@@ -17,7 +18,7 @@ const wrapWithProtectedRoute = (element: React.ReactNode) => <ProtectedRouteWrap
 const routesConfig = [
     {path: "/", element: <Navigate to={"/my-files"}/>, wrappers: [], errorElement: <ErrorPage/>},
     {path: "/my-files/*", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
-    {path: "/shared-with-me", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
+    {path: "/shared-with-me/*", element: <ShareForMePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
     {path: "/shared-by-me", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
     {path: "/trash", element: <HomePage/>, wrappers: [wrapWithProtectedRoute], errorElement: <ErrorPage/>},
     {path: "/login", element: <LoginPage/>, wrappers: [], errorElement: <ErrorPage/>},

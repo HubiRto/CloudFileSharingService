@@ -60,7 +60,6 @@ export const RenameFileModal = ({file, isOpen, onClose}: Props) => {
             },
         })
             .then((res) => {
-                console.log(res);
                 renameFile(file.name, changeFileName(file.name, values.name), res.data.lastModifiedAt);
                 onClose();
                 toast.success("Successfully renamed file");

@@ -16,4 +16,14 @@ public class AppException extends RuntimeException {
         this.status = status;
         this.details = new HashMap<>();
     }
+
+    @SafeVarargs
+    public AppException(String message, HttpStatus status, Map.Entry<String, Object>... entries) {
+        super(message);
+        this.status = status;
+        this.details = new HashMap<>();
+        for (Map.Entry<String, Object> entry : entries) {
+            this.details.put(entry.getKey(), entry.getValue());
+        }
+    }
 }

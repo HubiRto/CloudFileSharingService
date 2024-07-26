@@ -1,7 +1,9 @@
-import {Link} from "react-router-dom";
+import {Link, useLocation} from "react-router-dom";
 import {FileIcon, MountainIcon, ShareIcon, TrashIcon, UsersIcon} from "lucide-react";
 
 export function Sidebar(){
+    const location = useLocation();
+
     return (
         <div className="hidden border-r bg-muted/40 lg:block">
             <div className="flex h-full max-h-screen flex-col gap-2">
@@ -16,31 +18,35 @@ export function Sidebar(){
                 <div className="flex-1 overflow-auto py-2">
                     <nav className="grid items-start px-4 text-sm font-medium">
                         <Link
-                            to="#"
-                            className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
+                            to="/my-files"
+                            className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary 
+                            ${location.pathname.startsWith("/my-files") ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
                         >
                             <FileIcon className="h-4 w-4"/>
                             My Files
                         </Link>
                         <Link
-                            to="#"
-                            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                            to="/shared-by-me"
+                            className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary 
+                            ${location.pathname.startsWith("/shared-by-me") ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
 
                         >
                             <ShareIcon className="h-4 w-4"/>
                             Shared by Me
                         </Link>
                         <Link
-                            to="#"
-                            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                            to="/shared-with-me"
+                            className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary 
+                            ${location.pathname.startsWith("/shared-with-me") ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
 
                         >
                             <UsersIcon className="h-4 w-4"/>
                             Shared for Me
                         </Link>
                         <Link
-                            to="#"
-                            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                            to="/trash"
+                            className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary 
+                            ${location.pathname.startsWith("/trash") ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
 
                         >
                             <TrashIcon className="h-4 w-4"/>

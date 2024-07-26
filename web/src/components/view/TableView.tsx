@@ -5,19 +5,17 @@ import {formatFileSize} from "@/utils/formatFileSizeUtil.ts";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {format} from "date-fns";
-import {useFileContext} from "@/providers/FileProvider.tsx";
 import {FileContextMenu} from "@/components/contxtMenu/FileContextMenu.tsx";
 import {useSelectFileContext} from "@/providers/SelectFileProvider.tsx";
+import {FileData} from "@/models/FileData.ts";
 
 type TableViewProps = {
+    files: FileData[];
     path: string;
 };
 
-export const TableView: React.FC<TableViewProps> = ({path}) => {
-    const {files} = useFileContext();
+export const TableView: React.FC<TableViewProps> = ({files, path}) => {
     const {selectAll, selectFile, selectedFiles} = useSelectFileContext();
-
-    if (!files) return null;
 
     return (
         <>
@@ -25,7 +23,7 @@ export const TableView: React.FC<TableViewProps> = ({path}) => {
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[40px]">
-                            <Checkbox onCheckedChange={selectAll} />
+                            <Checkbox onCheckedChange={selectAll}/>
                         </TableHead>
                         <TableHead className="w-[40px]">
                             <span className="sr-only">Type</span>
@@ -39,7 +37,10 @@ export const TableView: React.FC<TableViewProps> = ({path}) => {
                 <TableBody>
                     {files.map((item, index) => (
                         <FileContextMenu file={item} key={index}>
-                            <TableRow>
+                            <TableRow
+                                className={`${selectedFiles.includes(item.id) ? 'bg-blue-100 hover:bg-blue-200' : ''}`}
+                                onClick={() => selectFile(item.id, !selectedFiles.includes(item.id))}
+                            >
                                 <TableCell>
                                     <Checkbox
                                         checked={selectedFiles.includes(item.id)}

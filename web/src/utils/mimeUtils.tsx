@@ -1,4 +1,4 @@
-import {FileIcon, FolderIcon, ImageIcon, VideoIcon} from "lucide-react";
+import {FileIcon, FolderArchive, FolderIcon, ImageIcon, VideoIcon} from "lucide-react";
 
 export const mimeToIcon = (mimeType: string, size: number) => {
     const style = `"h-${size} w-${size} text-muted-foreground`;
@@ -19,6 +19,12 @@ export const mimeToIcon = (mimeType: string, size: number) => {
         case 'dir': {
             return (
                 <FolderIcon className={`${style} text-yellow-500`}/>
+            );
+        }
+        case 'application/zip':
+        case 'application/x-tar':{
+            return (
+                <FolderArchive className={`${style} text-yellow-500`}/>
             );
         }
         default: {

@@ -40,12 +40,14 @@ import {GridView} from "@/components/view/GridView.tsx";
 import {TableView} from "@/components/view/TableView.tsx";
 import {useFileContext} from "@/providers/FileProvider.tsx";
 import {useModal} from "@/providers/ModalProvider.tsx";
-import {RenameFileModal} from "@/components/modals/RenameFile.tsx";
+import {RenameFileModal} from "@/components/modals/RenameFileModal.tsx";
 import {FloatingUploadCardProvider} from "@/providers/FloatingUploadCardProvider.tsx";
 import FloatingUploadCard from "@/components/FloatingUploadCard.tsx";
 import {AddFileModal} from "@/components/modals/AddFileModal.tsx";
 import {useSelectFileContext} from "@/providers/SelectFileProvider.tsx";
 import toast from "react-hot-toast";
+import {CompressModal} from "@/components/modals/CompressModal.tsx";
+import {ShareFileModal} from "@/components/modals/ShareFileModal.tsx";
 
 
 export default function HomePage() {
@@ -288,7 +290,8 @@ export default function HomePage() {
                                 ) : (
                                     <>
                                         <p>{selectedFiles.length} selected</p>
-                                        <Button variant="outline" size="sm" className="h-8 gap-1">
+                                        <Button variant="outline" size="sm" className="h-8 gap-1"
+                                                onClick={() => openModal("compress")}>
                                             <FolderArchive className="h-3.5 w-3.5"/>
                                             <span
                                                 className="sr-only sm:not-sr-only sm:whitespace-nowrap">Compress</span>
@@ -327,9 +330,7 @@ export default function HomePage() {
                         >
                             {view === "grid" ?
                                 <GridView files={files} path={path!}/> :
-                                <TableView
-                                    path={path!}
-                                />
+                                <TableView files={files} path={path!}/>
                             }
                         </InfiniteScroll>
                     </main>
@@ -351,6 +352,15 @@ export default function HomePage() {
                         isOpen={isOpen('addFile')}
                         onClose={closeModal}
                         path={path === '' ? '/' : (`/${path}/`)}
+                    />
+                    <CompressModal
+                        isOpen={isOpen('compress')}
+                        onClose={closeModal}
+                        path={path === '' ? '/' : (`/${path}/`)}
+                    />
+                    <ShareFileModal
+                        isOpen={isOpen('share')}
+                        onClose={closeModal}
                     />
 
                     <FloatingUploadCard path={path === '' ? '/' : (`/${path}/`)}/>

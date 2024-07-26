@@ -17,11 +17,17 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
     public User getUserFromToken(String token) {
         String email = jwtService.extractUsername(token);
-        return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+        return getUserFromEmail(email);
+    }
+
+    public User getUserFromEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 }

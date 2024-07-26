@@ -41,6 +41,16 @@ public class FileController {
         return ResponseEntity.ok(filesMapper.mapToResponse(fileMetadataService.uploadFile(file, path, token)));
     }
 
+    @GetMapping("/download/image/{id}")
+    public ResponseEntity<byte[]> downloadImage(
+            @NotNull(message = "Token cannot be null")
+            @NotEmpty(message = "Token cannot be empty")
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id
+    ) {
+        return fileMetadataService.downloadImage(id, token);
+    }
+
     @Transactional
     @PostMapping("/addNew")
     public ResponseEntity<FileMetadataResponse> uploadFiles(
@@ -124,4 +134,5 @@ public class FileController {
         fileMetadataService.deleteFiles(ids, token);
         return ResponseEntity.ok("Successfully deleted %d files".formatted(ids.length));
     }
+
 }

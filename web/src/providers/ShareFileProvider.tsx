@@ -1,9 +1,9 @@
 import React, {createContext, ReactNode, useContext, useState} from "react";
 import {FileData} from "@/models/FileData.ts";
 
-interface FileContextType {
+interface ShareFileContextType {
     files: FileData[];
-    addFile: (file: FileData, isFolder: boolean) => void;
+    addFile: (file: FileData) => void;
     addFiles: (files: FileData[]) => void;
     removeFile: (fileName: string) => void;
     removeFiles: (ids: number[]) => void;
@@ -12,13 +12,13 @@ interface FileContextType {
     renameFile: (oldName: string, newName: string, newLastUpdatedAt: string) => void;
 }
 
-const FileContext = createContext<FileContextType | undefined>(undefined);
+const ShareFileContext = createContext<ShareFileContextType | undefined>(undefined);
 
-export const FileProvider: React.FC<{ children: ReactNode }> = ({children}) => {
+export const ShareFileProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const [files, setFiles] = useState<FileData[]>([]);
 
-    const addFile = (file: FileData, isFolder: boolean = false) => {
-        setFiles(prevFiles => !isFolder ? [...prevFiles, file] : [file, ...prevFiles]);
+    const addFile = (file: FileData) => {
+        setFiles(prevFiles => [...prevFiles, file]);
     };
 
     const addFiles = (files: FileData[]) => {
@@ -51,24 +51,15 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({children}) => {
 
 
     return (
-        <FileContext.Provider
-            value={{
-                files,
-                addFile,
-                addFiles,
-                removeFile,
-                removeFiles,
-                removeAllFiles,
-                setFiles: setNewFiles,
-                renameFile
-            }}>
+        <ShareFileContext.Provider
+            value={{files, addFile, addFiles, removeFile, removeFiles, removeAllFiles, setFiles: setNewFiles, renameFile}}>
             {children}
-        </FileContext.Provider>
+        </ShareFileContext.Provider>
     );
 };
 
-export const useFileContext = () => {
-    const context = useContext(FileContext);
+export const useShareFileContext = () => {
+    const context = useContext(ShareFileContext);
     if (!context) {
         throw new Error('useFileContext must be used within a SelectFileProvider');
     }

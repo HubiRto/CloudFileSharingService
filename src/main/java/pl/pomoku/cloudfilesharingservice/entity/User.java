@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.pomoku.cloudfilesharingservice.enumerated.Role;
 
+import javax.print.attribute.standard.Media;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -62,6 +63,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FileMetadata> files;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FileShare> shares;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -4,7 +4,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +25,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.UUID;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -39,6 +43,33 @@ public class FileMetadataService {
 
     public Page<FileMetadata> findAllByNameContainingAndToken(String context, String token, Pageable pageable) {
         return fileMetadataRepository.findAllByNameContainingAndCreatedBy(context, userService.getUserFromToken(token), pageable);
+    }
+
+    public ResponseEntity<byte[]> downloadImage(Long id, String token) {
+        User user = userService.getUserFromToken(token);
+
+        FileMetadata fileMetadata = fileMetadataRepository.findById(id)
+                .orElseThrow(() -> new AppException("File with this id does not exist", HttpStatus.NOT_FOUND));
+
+        if (!fileMetadata.getCreatedBy().equals(user) && fileMetadata.getShares().stream().noneMatch((share) -> share.getUser() == user)) {
+            throw new AppException("You don't have permission to access this file", HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            Path filePath = Paths.get(fileMetadata.getFilePath()).toAbsolutePath().normalize();
+            byte[] imageBytes = Files.readAllBytes(filePath);
+            String contentType = Files.probeContentType(filePath);
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(fileMetadata.getMime()))
+                    .body(imageBytes);
+        } catch (Exception e) {
+            throw new AppException("Error while reading the file", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     public void deleteFile(Long id, String token) {

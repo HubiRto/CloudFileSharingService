@@ -73,12 +73,14 @@ export const FileContextMenu = ({file, children}: Props) => {
                             <span>Open in new tab</span>
                             <ContextMenuShortcut>⇧⌘P</ContextMenuShortcut>
                         </ContextMenuItem>
-                        <ContextMenuItem>
-                            <ArrowDownToLine className="mr-2 h-4 w-4"/>
-                            <span>Download</span>
-                            <ContextMenuShortcut>⌘B</ContextMenuShortcut>
-                        </ContextMenuItem>
-                        <ContextMenuItem>
+                        {file.mime !== 'dir' && (
+                            <ContextMenuItem>
+                                <ArrowDownToLine className="mr-2 h-4 w-4"/>
+                                <span>Download</span>
+                                <ContextMenuShortcut>⌘B</ContextMenuShortcut>
+                            </ContextMenuItem>
+                        )}
+                        <ContextMenuItem onClick={() => openModal('share', file.id)}>
                             <Share2 className="mr-2 h-4 w-4"/>
                             <span>Share</span>
                             <ContextMenuShortcut>⌘S</ContextMenuShortcut>
